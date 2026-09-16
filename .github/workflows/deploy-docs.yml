@@ -4,6 +4,12 @@ on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release version / tag to deploy documentation from (e.g. v0.1.0 or empty for current ref)'
+        required: false
+        type: string
+        default: ''
 
 permissions:
   contents: read
@@ -19,8 +25,19 @@ jobs:
     name: Build Documentation
     runs-on: ubuntu-latest
     steps:
+      - name: Determine Git Ref
+        id: git-ref
+        run: |
+          if [ -n "${{ inputs.release_tag }}" ]; then
+            echo "ref=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=${{ github.ref }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.git-ref.outputs.ref }}
 
       - name: Install pnpm
         uses: pnpm/action-setup@v6

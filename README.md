@@ -201,6 +201,11 @@ The repository is configured with automated GitHub Actions CI/CD (`.github/workf
      - `docker-compose.prod.yml` & `.env.production.example`: Production docker compose templates.
      - `SHA256SUMS.txt`: SHA-256 integrity checksums for all release archives.
    - **GitHub Release**: Automatically creates tagged GitHub Releases with auto-generated release notes.
+   - **Automated GitHub Pages Documentation**: Deploys the pre-built `docs-dist` artifact directly to GitHub Pages (`github-pages` environment) as the final step of the release pipeline.
+
+3. **Manual Documentation Deployment Workflow (`.github/workflows/deploy-docs.yml`)**:
+   - Supports manual on-demand deployment via `workflow_dispatch` in the Actions tab.
+   - Allows specifying an optional `release_tag` (e.g. `v0.1.0`) to build and deploy documentation from a specific release or tag without triggering a full CI/CD run.
 
 ---
 
@@ -213,7 +218,7 @@ The monorepo features a unified, statically hostable technical documentation hub
 - **Client TypeDoc & TSDoc API Reference**: `Docs/client/index.html`.
 - **Components Storybook Design System**: `Docs/storybook/index.html`.
 
-The documentation hub is completely static (ready for GitHub Pages, S3, Netlify, Nginx, or any static hosting) and is automatically built, validated, and uploaded as an artifact (`docs-dist`) and release asset (`docs-dist.tar.gz`) in GitHub Actions CI/CD (`.github/workflows/ci-cd.yml`).
+The documentation hub is completely static and hosted on **GitHub Pages**. It is automatically deployed upon each production release (`.github/workflows/ci-cd.yml`) and can also be deployed on-demand via the dedicated `.github/workflows/deploy-docs.yml` workflow. In CI/CD, the documentation is built, validated, and archived as an artifact (`docs-dist`) and release asset (`docs-dist.tar.gz`).
 
 ---
 

@@ -339,14 +339,26 @@ This ensures:
 7. Production builds for `server` and `client` succeed.
 8. CI/CD will fail and halt all builds and releases if any warning or error is detected.
 
-### 10. Automatic AGENTS.md & Documentation Maintenance
+### 10. Documentation & GitHub Pages Deployment Workflow
+
+- **Unified Documentation Hub**:
+  - The static documentation portal is generated into `Docs/` by `pnpm run build:docs` and previews locally via `pnpm run preview:docs`.
+  - Aggregates server OpenAPI/Swagger specs, client TypeDoc reference, and Web Components Storybook design system into a single portal (`Docs/index.html`).
+- **Automated Deployment via Release Pipeline**:
+  - The CI/CD pipeline (`.github/workflows/ci-cd.yml`) automatically builds and archives documentation as `docs-dist`.
+  - Upon completing the production release, the `deploy-docs` job downloads the artifact and deploys it directly to GitHub Pages (`actions/deploy-pages@v4` on environment `github-pages`).
+- **Manual On-Demand Deployment (`.github/workflows/deploy-docs.yml`)**:
+  - Developers can trigger manual deployments from the GitHub Actions tab via `workflow_dispatch`.
+  - An optional `release_tag` input allows checking out and publishing documentation for a specific release tag or branch.
+
+### 11. Automatic AGENTS.md & Documentation Maintenance
 
 - **Mandatory Self-Updating Documentation**:
   - Whenever implementing a change, refactoring, adding a feature, updating a workflow, modifying configuration/environment variables, or altering commands, developers and AI agents must automatically update the relevant `AGENTS.md` file(s) (`AGENTS.md`, `server/AGENTS.md`, `client/AGENTS.md`, `components/AGENTS.md`).
   - Any change made that affects information already documented in any `AGENTS.md` file, or introduces new concepts, conventions, patterns, endpoints, or architectures that should be documented in them, must be reflected immediately in the documentation as part of the same task.
   - Never allow `AGENTS.md` documentation to become stale or outdated.
 
-### 11. Specialized Guidelines
+### 12. Specialized Guidelines
 
 In addition to this root guide, domain-specific guides are available in their respective workspace packages:
 
