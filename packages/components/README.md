@@ -2,6 +2,8 @@
 
 A modern, standalone Web Components library and design system for the **Atiesh Codex** application built with Lit, TypeScript, Vite, Storybook, and Jest.
 
+Official documentation and interactive Storybook showcase: **[https://drixfs.github.io/AtieshCodex/storybook/](https://drixfs.github.io/AtieshCodex/storybook/)** (part of the unified documentation hub at **[https://drixfs.github.io/AtieshCodex/](https://drixfs.github.io/AtieshCodex/)**).
+
 ## Features
 
 - **Standard Web Components**: Built with [Lit](https://lit.dev/) with native Custom Element registration and Shadow DOM encapsulation.

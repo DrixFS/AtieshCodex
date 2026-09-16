@@ -320,7 +320,7 @@ const portalHtml = `<!DOCTYPE html>
   </main>
 
   <footer>
-    Atiesh Codex &bull; Monorepo Documentation Hub
+    Atiesh Codex &bull; Official Documentation: <a href="https://drixfs.github.io/AtieshCodex/" style="color: var(--accent-gold); text-decoration: none;" target="_blank" rel="noopener noreferrer">drixfs.github.io/AtieshCodex</a>
   </footer>
 </body>
 </html>

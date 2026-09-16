@@ -1,6 +1,6 @@
 # Agents Guide: Atiesh Codex
 
-This document provides essential guidelines, architectural context, and workflow instructions for AI agents and developers working on the **Atiesh Codex** application (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com**.
+This document provides essential guidelines, architectural context, and workflow instructions for AI agents and developers working on the **Atiesh Codex** application (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com** and official technical documentation at **[https://drixfs.github.io/AtieshCodex/](https://drixfs.github.io/AtieshCodex/)**.
 
 ---
 

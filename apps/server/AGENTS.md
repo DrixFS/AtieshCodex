@@ -1,6 +1,6 @@
 # Server Agent Guide: Atiesh Codex Backend API
 
-This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working specifically on the **NestJS Backend API service** (`server/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com**.
+This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working specifically on the **NestJS Backend API service** (`server/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com** and official technical documentation at **[https://drixfs.github.io/AtieshCodex/](https://drixfs.github.io/AtieshCodex/)**.
 
 ---
 
@@ -210,7 +210,7 @@ apps/server/
   - Leverages industry-standard **`openapi-typescript`** to convert OpenAPI paths, operations, parameters, and component schemas into strictly typed TypeScript interfaces.
   - Generates full OpenAPI `paths`, `components`, `operations`, and convenient schema helper aliases (`PingResponseDto`, `PingResponse`, `Schema<T>`).
   - Clears destination and writes directly to `packages/contracts/src/index.ts` formatted with Prettier.
-  - Emits OpenAPI 3.0 JSON specification (`Docs/api/openapi.json`) and interactive documentation (`Docs/api/index.html`) using modern Scalar API reference rendering.
+  - Emits OpenAPI 3.0 JSON specification (`Docs/api/openapi.json`) and interactive documentation (`Docs/api/index.html`) using modern Scalar API reference rendering, deployed automatically to the official documentation hub at **[https://drixfs.github.io/AtieshCodex/api/](https://drixfs.github.io/AtieshCodex/api/)**.
 - **Modular Scalability**: Any newly added feature module in `src/modules/` that is registered in `AppModule` and decorated with Swagger annotations will automatically have its DTOs discovered and generated into `@atiesh/contracts` upon running `pnpm run generate:api-types`.
 
 ### 12. Automatic AGENTS.md & Documentation Maintenance

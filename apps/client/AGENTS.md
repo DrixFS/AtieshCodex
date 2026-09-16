@@ -1,6 +1,6 @@
 # Client Agent Guide: Atiesh Codex Frontend SPA
 
-This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working specifically on the **React Single-Page Application (SPA)** (`apps/client/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com**.
+This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working specifically on the **React Single-Page Application (SPA)** (`apps/client/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com** and official technical documentation at **[https://drixfs.github.io/AtieshCodex/](https://drixfs.github.io/AtieshCodex/)**.
 
 ---
 
@@ -248,7 +248,7 @@ apps/client/
 - The client codebase enforces **TSDoc standards** (`/** ... */`) across all shared core infrastructure (`src/core/api/`, `src/core/stores/`, `src/core/query/`, `src/core/router/`, `src/core/config/`) and UI components.
 - **Automated TypeDoc Generation**:
   - Configured via `apps/client/typedoc.json`.
-  - Generates searchable, static HTML API documentation at top-level `Docs/client/`.
+  - Generates searchable, static HTML API documentation at top-level `Docs/client/`, deployed automatically to the official documentation hub at **[https://drixfs.github.io/AtieshCodex/client/](https://drixfs.github.io/AtieshCodex/client/)**.
   - Build command: `pnpm --filter client run docs` (or from root: `pnpm run build:docs`).
 - **TSDoc Guidelines**:
   - Annotate all exported interfaces, types, functions, classes, and MobX stores.

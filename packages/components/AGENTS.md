@@ -1,6 +1,6 @@
 # Components Agent Guide: Atiesh Codex Web Components
 
-This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working on the **Web Components Library & Storybook** (`packages/components/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever).
+This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working on the **Web Components Library & Storybook** (`packages/components/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever). Official documentation and Storybook showcase hosted at **[https://drixfs.github.io/AtieshCodex/](https://drixfs.github.io/AtieshCodex/)** (Storybook: **[https://drixfs.github.io/AtieshCodex/storybook/](https://drixfs.github.io/AtieshCodex/storybook/)**).
 
 ---
 
