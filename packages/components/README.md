@@ -17,6 +17,10 @@ A modern, standalone Web Components library and design system for the **Atiesh C
 - `pnpm build:storybook`: Build static Storybook site to `Docs/storybook/`
 - `pnpm test`: Run automated unit tests with Jest
 - `pnpm test:watch`: Run Jest in watch mode
+- `pnpm test:cov`: Run Jest with test coverage report
+- `pnpm test:visual`: Run Playwright visual regression tests against Storybook
+- `pnpm test:visual:update`: Update Playwright baseline visual regression snapshots
+- `pnpm check:circular`: Check for circular dependencies via `dpdm`
 - `pnpm typecheck`: Run TypeScript compilation check (`tsc --noEmit`)
 - `pnpm typewatch`: Run TypeScript check in watch mode (`tsc --noEmit --watch`)
 - `pnpm clean`: Remove build artifacts (`dist`, `dist-storybook`)

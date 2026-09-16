@@ -170,23 +170,23 @@ apps/server/
     }
   }
   ```
-- In production / Kubernetes environments, sensitive variables (`APP_SECRET`, `DATABASE_URL`) are isolated in `k8s/secret.yaml` and injected via `secretRef: name: atiesh-codex-secrets`, while non-sensitive configs are managed in `k8s/configmap.yaml`.
-- Any new environment variable must be documented in `server/.env.example` and root `.env.example`.
+- In production / Kubernetes environments, sensitive variables (`APP_SECRET`, `DATABASE_URL`) are isolated in `k8s/base/secret.yaml` and injected via `secretRef: name: atiesh-codex-secrets`, while non-sensitive configs are managed in `k8s/base/configmap.yaml`.
+- Any new environment variable must be documented in `apps/server/.env.example` and root `.env.example`.
 - **Never commit `.env`, `.env.local`, or any `.env.*` files containing secrets to source control.** All runtime `.env` files are ignored in `.gitignore`.
 
 ### 8. Health Checks & Kubernetes Probes
 
 - The server provides a lightweight health probe endpoint `/api/ping` via `PingController` and `PingService`.
 - **Docker Compose**: Container health checks query `wget --no-verbose --tries=1 --spider http://localhost:3001/api/ping || exit 1`.
-- **Kubernetes**: Both liveness and readiness probes in `k8s/server.yaml` use `httpGet` targeting `/api/ping` on port 3001 to ensure the NestJS event loop and HTTP handlers are actively serving traffic.
+- **Kubernetes**: Both liveness and readiness probes in `k8s/base/server.yaml` use `httpGet` targeting `/api/ping` on port 3001 to ensure the NestJS event loop and HTTP handlers are actively serving traffic.
 
 ### 9. OpenAPI & Swagger API Documentation Standards
 
-- Swagger is integrated via `@nestjs/swagger` and initialized in `server/src/main.ts`.
+- Swagger is integrated via `@nestjs/swagger` and initialized in `src/main.ts`.
 - When the server is running, the interactive documentation is available at:
   - **Swagger UI**: `http://localhost:<PORT>/api/docs` (default: `http://localhost:3001/api/docs`)
   - **OpenAPI JSON Spec**: `http://localhost:<PORT>/api/docs-json`
-- **Compiler Plugin**: `server/nest-cli.json` has `"plugins": ["@nestjs/swagger"]` enabled, automatically extracting property types, comments, and DTO metadata during compilation (`nest build`).
+- **Compiler Plugin**: `apps/server/nest-cli.json` has `"plugins": ["@nestjs/swagger"]` enabled, automatically extracting property types, comments, and DTO metadata during compilation (`nest build`).
 - **Controller Conventions**:
   - Add `@ApiTags('<Feature/Domain>')` on every controller class.
   - Add `@ApiOperation({ summary: '...', description: '...' })` on endpoint methods.
@@ -205,7 +205,7 @@ apps/server/
 ### 11. Client API Type Generation & Contract Synchronization
 
 - **Single Source of Truth**: The server's OpenAPI metadata and DTO schemas serve as the contract definition for the frontend client. The client does not declare duplicate backend interfaces.
-- **Generator Script** (`server/scripts/generate-api-types.ts` / `pnpm run generate:api-types`):
+- **Generator Script** (`apps/server/scripts/generate-api-types.ts` / `pnpm run generate:api-types`):
   - Programmatically initializes NestJS `AppModule` using server-scoped `ts-node` to build the complete OpenAPI 3.0 document.
   - Leverages industry-standard **`openapi-typescript`** to convert OpenAPI paths, operations, parameters, and component schemas into strictly typed TypeScript interfaces.
   - Generates full OpenAPI `paths`, `components`, `operations`, and convenient schema helper aliases (`PingResponseDto`, `PingResponse`, `Schema<T>`).
@@ -243,16 +243,18 @@ Every feature, endpoint, and core service must be accompanied by automated tests
 
 ## 5. Server Development Commands
 
-Server commands can be run directly from the root workspace or within `server/`:
+Server commands can be run directly from the root workspace or within `apps/server/`:
 
-| Command (from root)               | Command (in `server/`)    | Description                                                                           |
-| :-------------------------------- | :------------------------ | :------------------------------------------------------------------------------------ |
-| `pnpm run dev:server`             | `pnpm dev`                | Start NestJS development server with watch mode                                       |
-| `pnpm run dev:debug`              | `pnpm dev:debug`          | Start NestJS with inspector debugger enabled on port 9229                             |
-| `pnpm run generate:api-types`     | `pnpm generate:api-types` | Generate TypeScript interfaces from OpenAPI schemas directly into `@atiesh/contracts` |
-| `pnpm run build:server`           | `pnpm build`              | Compile TypeScript and build production bundle in `dist/`                             |
-| `pnpm run test:server`            | `pnpm test`               | Run all Jest unit and integration tests                                               |
-| `pnpm --filter server test:watch` | `pnpm test:watch`         | Run Jest tests in interactive watch mode                                              |
-| `pnpm --filter server test:cov`   | `pnpm test:cov`           | Generate Jest test coverage report                                                    |
-| `pnpm run check:circular:server`  | `pnpm check:circular`     | Check for circular dependencies in server source files via `dpdm`                     |
-| `pnpm run start`                  | `pnpm start`              | Run production build (`node dist/main.js`)                                            |
+| Command (from root)               | Command (in `apps/server/`) | Description                                                                           |
+| :-------------------------------- | :-------------------------- | :------------------------------------------------------------------------------------ |
+| `pnpm run dev:server`             | `pnpm dev`                  | Start NestJS development server with watch mode                                       |
+| `pnpm run dev:debug`              | `pnpm dev:debug`            | Start NestJS with inspector debugger enabled on port 9229                             |
+| `pnpm run generate:api-types`     | `pnpm generate:api-types`   | Generate TypeScript interfaces from OpenAPI schemas directly into `@atiesh/contracts` |
+| `pnpm run build:server`           | `pnpm build`                | Compile TypeScript and build production bundle in `dist/`                             |
+| `pnpm run test:server`            | `pnpm test`                 | Run all Jest unit and integration tests                                               |
+| `pnpm --filter server test:watch` | `pnpm test:watch`           | Run Jest tests in interactive watch mode                                              |
+| `pnpm --filter server test:cov`   | `pnpm test:cov`             | Generate Jest test coverage report                                                    |
+| `pnpm run check:circular:server`  | `pnpm check:circular`       | Check for circular dependencies in server source files via `dpdm`                     |
+| `pnpm --filter server typecheck`  | `pnpm typecheck`            | Run TypeScript compiler type check (`tsc --noEmit`)                                   |
+| `pnpm --filter server typewatch`  | `pnpm typewatch`            | Run TypeScript compiler type check in watch mode                                      |
+| `pnpm run start`                  | `pnpm start`                | Run production build (`node dist/main`)                                               |
