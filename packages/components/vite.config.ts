@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite';
 import dts from 'vite-plugin-dts';
 import { resolve } from 'path';
 
@@ -28,10 +28,5 @@ export default defineConfig(({ mode }) => ({
   esbuild: {
     legalComments: 'none',
     drop: mode === 'production' ? ['console', 'debugger'] : [],
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
   },
 }));

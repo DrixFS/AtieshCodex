@@ -6,7 +6,7 @@ This document provides specialized guidelines, architectural patterns, and devel
 
 ## 1. Application Overview & Architecture
 
-The components package is a framework-agnostic, standalone **Web Components design system and UI library** built with **Lit 3**, **TypeScript 5**, **Vite 6**, **Storybook 8**, and **Vitest**. It serves as the single foundation for design tokens, styles, and reusable custom elements that can be seamlessly consumed by the React SPA (`client/`) or any standard web runtime without tight coupling.
+The components package is a framework-agnostic, standalone **Web Components design system and UI library** built with **Lit 3**, **TypeScript 5**, **Vite 6**, **Storybook 8**, and **Jest**. It serves as the single foundation for design tokens, styles, and reusable custom elements that can be seamlessly consumed by the React SPA (`client/`) or any standard web runtime without tight coupling.
 
 ```text
 packages/components/
@@ -42,7 +42,7 @@ packages/components/
 When adding new Web Components to the design system, isolate each component into its own dedicated folder under `src/components/<component-name>/`:
 
 - **Component Implementation (`<name>.ts`)**: Lit-based Custom Element definition with encapsulated Shadow DOM styles, reactive properties, accessibility attributes, and custom event dispatches.
-- **Unit Tests (`<name>.test.ts`)**: Vitest test suite validating rendering, property reflections, slot behavior, user interaction, and event dispatching.
+- **Unit Tests (`<name>.test.ts`)**: Jest test suite validating rendering, property reflections, slot behavior, user interaction, and event dispatching.
 - **Storybook Stories (`<name>.stories.ts`)**: Interactive documentation with controls, variations, and themes.
 - **Barrel Export (`index.ts`)**: Exports the component class and associated types.
 

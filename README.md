@@ -24,7 +24,7 @@ Before setting up the project, ensure you have the following installed on your m
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/DrixFS/AtieshCodex
 cd atiesh-codex
 ```
 
@@ -179,7 +179,7 @@ The repository is configured with automated GitHub Actions CI/CD (`.github/workf
      - ESLint linting with strict typing (0 errors and 0 warnings allowed via `--max-warnings 0`).
      - Circular dependency detection via `dpdm` (`pnpm run check:circular`).
      - TypeScript compiler type checks (`tsc --noEmit`).
-     - Jest and Vitest automated test suites.
+     - Jest automated test suites.
    - Quality checks gate ensures all stages complete and pass before allowing production compilation.
    - If any warnings or errors are present, the workflow immediately halts and skips subsequent build, Docker, and release jobs.
    - Compiles production bundles, validates Kubernetes manifests (`kustomize`), and tests Docker Compose configuration.
@@ -303,7 +303,7 @@ The design system is a standalone, framework-agnostic **Web Components library**
 - **Component Module Anatomy**:
   - Isolate each custom element in its own folder under `src/components/<component-name>/`:
     - `<name>.ts`: Lit component class definition extending `LitElement`.
-    - `<name>.test.ts`: Vitest component unit tests with JSDOM.
+    - `<name>.test.ts`: Jest component unit tests with JSDOM.
     - `<name>.stories.ts`: Interactive Storybook documentation and variant controls.
     - `index.ts`: Local barrel export for the component and its types.
   - Re-export the component in `src/index.ts`.
@@ -327,7 +327,7 @@ The design system is a standalone, framework-agnostic **Web Components library**
 - **React JSX Compatibility**:
   - Whenever creating a new custom element, add its tag definition and attribute types to `src/types/jsx.d.ts` so consuming React applications have full autocomplete and type safety.
 - **Testing Lit Components**:
-  - Test rendering, property reflection, slots, and events in Vitest (`pnpm test:components`).
+  - Test rendering, property reflection, slots, and events in Jest (`pnpm test:components`).
   - **Important**: Always `await element.updateComplete` after modifying properties in tests before making DOM assertions to allow Lit's asynchronous render cycle to finish.
 
 ---
@@ -338,8 +338,8 @@ For detailed architectural guidelines, coding conventions, testing standards, an
 
 - **Root Monorepo Guide**: [`AGENTS.md`](./AGENTS.md) — Workspace architecture, orchestration, contracts synchronization, and CI verification protocol.
 - **Backend API Guide**: [`server/AGENTS.md`](./apps/server/AGENTS.md) — NestJS 11 architecture, DTO design, Swagger metadata, scripts, and Jest testing.
-- **Frontend SPA Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, ApiClient usage, React Router, and Vitest testing.
-- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Vitest component testing.
+- **Frontend SPA Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, ApiClient usage, React Router, and Jest testing.
+- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Jest component testing.
 
 ### Automatic Documentation Maintenance
 

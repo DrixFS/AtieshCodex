@@ -104,8 +104,8 @@ atiesh-codex/
 
 - **Package Manager & Monorepo Engine**: `pnpm` (v12.x) with strict workspace isolation and **Turborepo** (`turbo` v2) for pipeline orchestration and incremental computation caching.
 - **Backend**: NestJS 11, TypeScript 5, Express platform, Jest (`@swc/jest` compiler).
-- **Frontend**: React 19, TypeScript 5, Vite 6, Vitest, React Testing Library, JSDOM.
-- **Components**: Lit 3, TypeScript 5, Vite 6, Storybook 8, Vitest, JSDOM.
+- **Frontend**: React 19, TypeScript 5, Vite 6, Jest, React Testing Library, JSDOM.
+- **Components**: Lit 3, TypeScript 5, Vite 6, Storybook 8, Jest, JSDOM.
 - **Linting & Formatting**: ESLint (Flat Config v9), Prettier (single quotes, 2 spaces, 100 print width).
 - **Testing**: Unified **Jest** (`@swc/jest`) across all packages:
   - `apps/server`: Jest (`@swc/jest`, `@nestjs/testing`). Test files match `*.spec.ts`.
@@ -330,5 +330,5 @@ This ensures:
 In addition to this root guide, domain-specific guides are available in their respective workspace packages:
 
 - **Server Backend Guide**: [`server/AGENTS.md`](./apps/server/AGENTS.md) — NestJS architecture, controller/service conventions, configuration, Swagger/OpenAPI setup, and testing.
-- **Client Frontend Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, component guidelines, ApiClient integration, React Router, and Vitest testing.
-- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Vitest component testing.
+- **Client Frontend Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, component guidelines, ApiClient integration, React Router, and Jest testing.
+- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Jest component testing.
