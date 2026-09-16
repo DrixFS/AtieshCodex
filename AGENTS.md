@@ -16,7 +16,9 @@ atiesh-codex/
 │   │   │   ├── core/       # Core layout, Landing page, API clients, stores
 │   │   │   ├── features/   # Modular domain feature modules
 │   │   │   ├── test/       # Test setup & polyfills
+│   │   │   ├── App.css     # Component-level styles
 │   │   │   ├── App.tsx     # Main entry component
+│   │   │   ├── index.css   # Global theme, CSS variables & resets
 │   │   │   └── main.tsx    # DOM bootstrap
 │   │   ├── AGENTS.md       # Dedicated client agent & frontend guidelines
 │   │   ├── Dockerfile      # Turbo prune multi-stage build + Nginx runtime
@@ -39,20 +41,32 @@ atiesh-codex/
 │       ├── Dockerfile      # Turbo prune multi-stage production build (Node.js)
 │       ├── nest-cli.json   # Nest CLI configuration (Swagger plugin)
 │       ├── package.json    # Server package manifest & scripts
+│       ├── tsconfig.build.json # TypeScript build compiler options (excludes scripts & tests)
 │       └── tsconfig.json   # TypeScript configuration (extends @atiesh/tsconfig/node)
 ├── packages/
 │   ├── components/         # Reusable Web Components Library & Storybook (@atiesh/components)
 │   │   ├── .storybook/     # Storybook configuration & preview
 │   │   ├── src/            # Reusable Lit Web Components & tokens
 │   │   ├── AGENTS.md       # Components design system guidelines
+│   │   ├── README.md       # Components package overview and developer quickstart
 │   │   ├── jest.config.cjs # SWC Jest configuration
-│   │   └── package.json
+│   │   ├── package.json    # Package manifest, dependencies, and component scripts
+│   │   ├── tsconfig.json   # TypeScript configuration (extends @atiesh/tsconfig/base)
+│   │   └── vite.config.ts  # Vite library bundler configuration
 │   ├── contracts/          # Auto-generated API Contracts and Schemas (@atiesh/contracts)
 │   │   ├── src/            # Type-safe paths, operations, schemas
-│   │   └── package.json
+│   │   ├── package.json    # Package manifest and build scripts
+│   │   └── tsconfig.json   # TypeScript build configuration
 │   ├── eslint-config/      # Shared modular ESLint flat configs (@atiesh/eslint-config)
+│   │   ├── base.js         # Base ESLint flat configuration
+│   │   ├── index.js        # Barrel export
+│   │   ├── node.js         # Node / NestJS ESLint flat configuration
+│   │   ├── react.js        # React / JSX ESLint flat configuration
 │   │   └── package.json
 │   └── tsconfig/           # Shared TypeScript configuration base (@atiesh/tsconfig)
+│       ├── base.json       # Base shared TypeScript configuration
+│       ├── node.json       # Node.js TypeScript configuration
+│       ├── react.json      # React TypeScript configuration
 │       └── package.json
 ├── Docs/                   # Statically generated documentation portal hub
 ├── k8s/                    # Kubernetes manifests & Kustomize overlays
@@ -84,10 +98,10 @@ atiesh-codex/
    - Kubernetes-ready manifests located under `k8s/` configured for zero-downtime rollouts, TLS termination, and standard ingress routing.
 4. **Secure Communication (HTTPS & TLS)**:
    - All production network traffic is strictly enforced over **HTTPS and WSS**.
-   - TLS termination and SSL redirection (`ssl-redirect: 'true'`, `force-ssl-redirect: 'true'`) are configured in Kubernetes Ingress (`k8s/ingress.yaml`).
-   - Frontend Nginx runtime (`client/nginx.conf`) enforces HTTP Strict Transport Security (`Strict-Transport-Security` / HSTS) and modern defensive HTTP security headers.
+   - TLS termination and SSL redirection (`ssl-redirect: 'true'`, `force-ssl-redirect: 'true'`) are configured in Kubernetes Ingress (`k8s/base/ingress.yaml`).
+   - Frontend Nginx runtime (`apps/client/nginx.conf`) enforces HTTP Strict Transport Security (`Strict-Transport-Security` / HSTS) and modern defensive HTTP security headers.
 5. **Configuration & Secrets Management**:
-   - Clean separation of non-sensitive environment configuration (`k8s/configmap.yaml`, `ConfigMap`) from sensitive credentials/tokens (`k8s/secret.yaml`, `Secret` or external secret vaults).
+   - Clean separation of non-sensitive environment configuration (`k8s/base/configmap.yaml`, `ConfigMap`) from sensitive credentials/tokens (`k8s/base/secret.yaml`, `Secret` or external secret vaults).
    - Server environment variables (`APP_SECRET`, `DATABASE_URL`) are strongly typed with runtime schema validation.
 6. **Single Source of Truth for API Contracts**:
    - Backend OpenAPI/Swagger DTO specifications are the single source of truth for API contracts.
@@ -104,9 +118,9 @@ atiesh-codex/
 
 - **Package Manager & Monorepo Engine**: `pnpm` (v12.x) with strict workspace isolation and **Turborepo** (`turbo` v2) for pipeline orchestration and incremental computation caching.
 - **Backend**: NestJS 11, TypeScript 5, Express platform, Jest (`@swc/jest` compiler).
-- **Frontend**: React 19, TypeScript 5, Vite 6, Vitest, React Testing Library, JSDOM.
-- **Components**: Lit 3, TypeScript 5, Vite 6, Storybook 8, Vitest, JSDOM.
-- **Linting & Formatting**: ESLint (Flat Config v9), Prettier (single quotes, 2 spaces, 100 print width).
+- **Frontend**: React 19, TypeScript 5, Vite 6, Jest, React Testing Library, JSDOM.
+- **Components**: Lit 3, TypeScript 5, Vite 6, Storybook 8, Jest, JSDOM.
+- **Linting & Formatting**: ESLint 10 (Flat Config), Prettier (single quotes, 2 spaces, 100 print width).
 - **Testing**: Unified **Jest** (`@swc/jest`) across all packages:
   - `apps/server`: Jest (`@swc/jest`, `@nestjs/testing`). Test files match `*.spec.ts`.
   - `apps/client`: Jest (`@swc/jest`, `@testing-library/react`, `jsdom`). Test files match `*.test.tsx` or `*.test.ts`.
@@ -121,8 +135,8 @@ All primary developer operations are orchestrated from the root using `pnpm`:
 > **CLI Shortcut Tips**:
 >
 > - In `pnpm`, the `run` keyword is optional for root scripts: `pnpm build:client` instead of `pnpm run build:client`.
-> - Use the `-F` shorthand for `--filter`: `pnpm -F client dev`, `pnpm -F server test`, `pnpm -F @atiesh/components storybook`.
-> - Direct folder navigation: `cd client && pnpm build` executes local package scripts automatically.
+> - Use the `-F` shorthand for `--filter`: `pnpm -F client dev`, `pnpm -F server test`, `pnpm -F @atiesh/components dev`.
+> - Direct folder navigation: `cd apps/client && pnpm build` (or `cd apps/server`, `cd packages/components`) executes local package scripts automatically.
 
 ### Setup & Installation
 
@@ -138,7 +152,7 @@ All primary developer operations are orchestrated from the root using `pnpm`:
 | ------------------------ | -------------------------------------------------------------------- |
 | `pnpm run dev`           | Start development servers in parallel with hot reloading             |
 | `pnpm run dev:server`    | Start only the NestJS backend with watch mode                        |
-| `pnpm run dev:client`    | Start only the Vite frontend dev server                              |
+| `pnpm run dev:client`    | Start only the Vite frontend dev server (port 3000)                  |
 | `pnpm run dev:storybook` | Start the Storybook component explorer on port `6006`                |
 | `pnpm run dev:debug`     | Start the NestJS backend in debug mode with inspector on port `9229` |
 
@@ -166,6 +180,7 @@ All primary developer operations are orchestrated from the root using `pnpm`:
 | `pnpm run test:server`        | Run backend unit and integration tests (Jest)                             |
 | `pnpm run test:client`        | Run frontend unit and component tests (Jest)                              |
 | `pnpm run test:components`    | Run Web Components unit tests (Jest)                                      |
+| `pnpm run test:cov`           | Run all Jest test suites with coverage report across packages             |
 | `pnpm run test:visual`        | Run Storybook visual regression tests with Playwright                     |
 | `pnpm run test:visual:update` | Update Storybook baseline visual snapshots with Playwright                |
 | `pnpm run test:watch`         | Run all tests in interactive watch mode across packages                   |
@@ -176,9 +191,10 @@ All primary developer operations are orchestrated from the root using `pnpm`:
 | Command                     | Description                                                                        |
 | --------------------------- | ---------------------------------------------------------------------------------- |
 | `pnpm run build`            | Compile TypeScript and build production bundles for server, client, and components |
-| `pnpm run build:server`     | Build backend NestJS application (`server/dist/`)                                  |
-| `pnpm run build:client`     | Build frontend static SPA bundle (`client/dist/`)                                  |
-| `pnpm run build:components` | Build Web Components library (`components/dist/`)                                  |
+| `pnpm run build:server`     | Build backend NestJS application (`apps/server/dist/`)                             |
+| `pnpm run build:client`     | Build frontend static SPA bundle (`apps/client/dist/`)                             |
+| `pnpm run build:components` | Build Web Components library (`packages/components/dist/`)                         |
+| `pnpm run build:contracts`  | Build auto-generated API contracts workspace package                               |
 | `pnpm run build:storybook`  | Build static Storybook site (`Docs/storybook/`)                                    |
 | `pnpm run clean`            | Remove `dist` and build output directories across all workspaces                   |
 | `pnpm run start`            | Start the production backend server (`node dist/main`)                             |
@@ -199,6 +215,7 @@ All primary developer operations are orchestrated from the root using `pnpm`:
 | `pnpm run check:circular:components` | Check circular dependencies in Web Components library                               |
 | `pnpm run typecheck`                 | Run TypeScript type checks (`tsc --noEmit`) across all packages                     |
 | `pnpm run typewatch`                 | Run TypeScript type checks in watch mode across packages                            |
+| `pnpm run audit`                     | Audit production dependencies for security vulnerabilities                          |
 
 ### Docker & Kubernetes
 
@@ -241,18 +258,18 @@ When implementing new features, refactoring, or fixing bugs in this repository, 
 
 - **Environment Architecture & Templates**:
   - **Root `.env.example`**: Monorepo-wide orchestration template for full-stack local development and Docker Compose.
-  - **`server/.env.example`**: Backend-scoped template documenting server ports, database connection strings, Redis, BullMQ, and secret placeholders.
-  - **`client/.env.example`**: Frontend-scoped template documenting public `VITE_*` browser environment variables.
+  - **`apps/server/.env.example`**: Backend-scoped template documenting server ports, database connection strings, Redis, BullMQ, and secret placeholders.
+  - **`apps/client/.env.example`**: Frontend-scoped template documenting public `VITE_*` browser environment variables.
 - **Security & `.gitignore`**:
   - **Never commit `.env`, `.env.local`, or any `.env.*` files containing secrets or real environment keys.**
   - Standard `.gitignore` rules strictly ignore all environment runtime files while allowing `.env.example` templates.
 - **Backend Environment Handling**:
   - Managed via `@nestjs/config` in `src/core/core.module.ts` and loaded via `src/core/config/configuration.ts`.
-  - Supports loading `.env.local` and `.env` whether executing from workspace root or inside `server/`.
+  - Supports loading `.env.local` and `.env` whether executing from workspace root or inside `apps/server/`.
 - **Frontend Environment Handling**:
-  - Validated at runtime with Zod in `src/core/config/env.ts` (`clientEnvSchema` and `validateClientEnv`), ensuring fail-fast runtime protection against missing or invalid variables.
+  - Validated at runtime with Zod in `apps/client/src/core/config/env.ts` (`clientEnvSchema` and `validateClientEnv`), ensuring fail-fast runtime protection against missing or invalid variables.
 - **Production & Kubernetes**:
-  - Maintain clean separation between non-sensitive configs (`k8s/configmap.yaml`) and sensitive credentials (`k8s/secret.yaml`), mounted using `configMapRef` and `secretRef`.
+  - Maintain clean separation between non-sensitive configs (`k8s/base/configmap.yaml`) and sensitive credentials (`k8s/base/secret.yaml`), mounted using `configMapRef` and `secretRef`.
 
 ### 5. API Documentation (OpenAPI / Swagger)
 
@@ -263,12 +280,12 @@ When implementing new features, refactoring, or fixing bugs in this repository, 
 - Every new controller must be decorated with `@ApiTags()`.
 - Every new endpoint method should be decorated with `@ApiOperation()` and `@ApiResponse()`.
 - Every DTO property must be decorated with `@ApiProperty()` or `@ApiPropertyOptional()` to maintain accurate schema specifications.
-- NestJS CLI is configured with the `@nestjs/swagger` compiler plugin in `server/nest-cli.json` to automatically extract metadata during compilation.
+- NestJS CLI is configured with the `@nestjs/swagger` compiler plugin in `apps/server/nest-cli.json` to automatically extract metadata during compilation.
 
 ### 6. API Contracts & Type Generation Workflow
 
 - Backend OpenAPI DTOs serve as the single source of truth for all API request and response data contracts.
-- **Industry Standard Tooling (`openapi-typescript`)**: TypeScript interfaces are generated directly from the server OpenAPI 3.0 specification using `openapi-typescript` (`server/scripts/generate-api-types.ts`), producing type-safe `paths`, `operations`, and `components['schemas']` definitions alongside convenient schema aliases in `@atiesh/contracts` (`packages/contracts/`).
+- **Industry Standard Tooling (`openapi-typescript`)**: TypeScript interfaces are generated directly from the server OpenAPI 3.0 specification using `openapi-typescript` (`apps/server/scripts/generate-api-types.ts`), producing type-safe `paths`, `operations`, and `components['schemas']` definitions alongside convenient schema aliases in `@atiesh/contracts` (`packages/contracts/`).
 - **Client Independence**: Frontend code must **never** manually duplicate or declare server API interfaces. All server models and contracts must be imported from the workspace package (`@atiesh/contracts`).
 - Whenever adding, refactoring, or extending backend endpoints and DTOs:
   1. Ensure the module is registered in `AppModule`.
@@ -279,13 +296,13 @@ When implementing new features, refactoring, or fixing bugs in this repository, 
 
 ### 7. Web Components & Workspace Integration Workflow
 
-- The `components/` package is named `@atiesh/components`, a standalone Web Components design system library and the single source of truth for UI primitives, custom elements, and design tokens.
+- The `packages/components/` package is named `@atiesh/components`, a standalone Web Components design system library and the single source of truth for UI primitives, custom elements, and design tokens.
 - **Direct Workspace Dependency & Hot Reloading**:
   - The client application links directly to `@atiesh/components` via pnpm workspace (`"@atiesh/components": "workspace:*"`).
-  - Its `package.json` exports map points directly to TypeScript source (`./src/index.ts`) and CSS (`./src/styles/theme.css`), enabling instant hot-reloading (HMR) across workspace boundaries in Vite development mode without requiring manual rebuilds or file-copying steps.
-  - When editing components in `components/`, changes take effect immediately in the client dev server.
+  - Its `package.json` exports map points directly to TypeScript source (`./src/index.ts`) and CSS (`./src/styles/theme.css`), enabling instant hot-reloading (HMR) across workspace boundaries in Vite development mode (port 3000) without requiring manual rebuilds or file-copying steps.
+  - When editing components in `packages/components/`, changes take effect immediately in the client dev server.
 - Individual scripts:
-  - `pnpm run build:components`: Compiles and bundles components to `components/dist/`.
+  - `pnpm run build:components`: Compiles and bundles components to `packages/components/dist/`.
   - `pnpm run build:storybook`: Compiles the static Storybook showcase to `Docs/storybook/`.
 
 ### 8. TypeScript & Type Safety Standards
@@ -330,5 +347,5 @@ This ensures:
 In addition to this root guide, domain-specific guides are available in their respective workspace packages:
 
 - **Server Backend Guide**: [`server/AGENTS.md`](./apps/server/AGENTS.md) — NestJS architecture, controller/service conventions, configuration, Swagger/OpenAPI setup, and testing.
-- **Client Frontend Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, component guidelines, ApiClient integration, React Router, and Vitest testing.
-- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Vitest component testing.
+- **Client Frontend Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, component guidelines, ApiClient integration, React Router, and Jest testing.
+- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Jest component testing.
