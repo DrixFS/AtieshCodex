@@ -1,0 +1,306 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: 'Publish release artifacts and Docker images'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/master' }}
+
+permissions:
+  contents: write
+  packages: write
+  pull-requests: read
+
+jobs:
+  validate:
+    name: Setup, Lint, Typecheck, Test & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies (Setup)
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Turborepo cache
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Generate and sync server API types
+        id: contracts
+        run: pnpm run generate:api-types
+        continue-on-error: true
+
+      - name: Check formatting (Prettier)
+        id: format
+        run: pnpm run format:check
+        continue-on-error: true
+
+      - name: Lint codebase (ESLint - 0 Warnings Allowed)
+        id: lint
+        run: pnpm run lint
+        continue-on-error: true
+
+      - name: Check circular dependencies (dpdm)
+        id: circular
+        run: pnpm run check:circular
+        continue-on-error: true
+
+      - name: Check TypeScript types
+        id: typecheck
+        run: pnpm run typecheck
+        continue-on-error: true
+
+      - name: Run automated test suites
+        id: test
+        run: pnpm run test
+        continue-on-error: true
+
+      - name: Audit dependencies for vulnerabilities
+        id: audit
+        run: pnpm audit --prod
+        continue-on-error: true
+
+      - name: Enforce Quality Checks Gate
+        if: |
+          steps.contracts.outcome != 'success' ||
+          steps.format.outcome != 'success' ||
+          steps.lint.outcome != 'success' ||
+          steps.circular.outcome != 'success' ||
+          steps.typecheck.outcome != 'success' ||
+          steps.test.outcome != 'success' ||
+          steps.audit.outcome != 'success'
+        run: |
+          echo "::error::One or more quality checks (contract sync, format, lint, circular dependencies, typecheck, test, or dependency audit) failed or generated warnings. Halting build and release."
+          exit 1
+
+      - name: Build applications and documentation (Server, Client, Components & Docs)
+        run: |
+          pnpm run build
+          pnpm run build:docs
+
+      - name: Upload Server Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-dist
+          path: apps/server/dist/
+          retention-days: 1
+
+      - name: Upload Client Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-dist
+          path: apps/client/dist/
+          retention-days: 1
+
+      - name: Upload Components Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: components-dist
+          path: packages/components/dist/
+          retention-days: 1
+
+      - name: Upload Documentation Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-dist
+          path: Docs/
+          retention-days: 1
+
+  validate-k8s:
+    name: Validate Kubernetes Manifests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate Kustomize and K8s Manifests
+        run: |
+          kubectl kustomize k8s/ > /dev/null
+          kubectl kustomize k8s/base/ > /dev/null
+          kubectl kustomize k8s/overlays/dev/ > /dev/null
+          kubectl kustomize k8s/overlays/prod/ > /dev/null
+
+  docker-test:
+    name: Validate Docker Compose Configuration
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config
+
+  release:
+    name: Build, Release & Publish Production Artifacts
+    needs: [validate, validate-k8s, docker-test]
+    if: |
+      (github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v'))) ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.publish_release != 'false')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download Server Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: server-dist
+          path: apps/server/dist
+
+      - name: Download Client Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: client-dist
+          path: apps/client/dist
+
+      - name: Download Components Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: components-dist
+          path: packages/components/dist
+
+      - name: Download Documentation Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docs-dist
+          path: Docs
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata (tags, labels) for Server image
+        id: meta-server
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/server
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push Server Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/server/Dockerfile
+          push: true
+          tags: ${{ steps.meta-server.outputs.tags }}
+          labels: ${{ steps.meta-server.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract metadata (tags, labels) for Client image
+        id: meta-client
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}/client
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main' }}
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix=sha-,format=short
+
+      - name: Build and push Client Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/client/Dockerfile
+          push: true
+          tags: ${{ steps.meta-client.outputs.tags }}
+          labels: ${{ steps.meta-client.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Package Release Artifacts
+        id: package-artifacts
+        run: |
+          mkdir -p release-assets
+
+          # Package Kubernetes deployment bundle
+          tar -czf release-assets/k8s-manifests.tar.gz k8s/
+
+          # Package compiled client, server, components and documentation bundles for direct deployment
+          tar -czf release-assets/client-dist.tar.gz -C apps/client dist/
+          tar -czf release-assets/server-dist.tar.gz -C apps/server dist/
+          tar -czf release-assets/components-dist.tar.gz -C packages/components dist/
+          tar -czf release-assets/docs-dist.tar.gz -C Docs .
+
+          # Copy Docker Compose and configuration templates
+          cp docker-compose.yml release-assets/docker-compose.prod.yml
+          cp .env.example release-assets/.env.production.example
+
+          # Compute SHA-256 Checksums for integrity verification
+          cd release-assets
+          sha256sum * > SHA256SUMS.txt
+          cd ..
+
+          # Determine Tag & Release Name
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            RELEASE_TAG="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION=$(node -p "require('./package.json').version")
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            RELEASE_TAG="v${VERSION}-${SHORT_SHA}"
+          fi
+          echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Create / Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.package-artifacts.outputs.release_tag }}
+          name: Release ${{ steps.package-artifacts.outputs.release_tag }}
+          generate_release_notes: true
+          files: |
+            release-assets/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

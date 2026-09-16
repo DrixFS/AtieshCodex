@@ -1,0 +1,21 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": [
+    "src/App.tsx",
+    "src/core/api/index.ts",
+    "src/core/config/index.ts",
+    "src/core/query/index.ts",
+    "src/core/router/index.ts",
+    "src/core/stores/index.ts",
+    "src/core/LandingPage.tsx",
+    "src/core/layout/MainLayout.tsx"
+  ],
+  "out": "../../Docs/client",
+  "name": "Atiesh Codex - Client API Documentation",
+  "includeVersion": true,
+  "readme": "none",
+  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/test/**", "**/node_modules/**"],
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "sort": ["source-order", "alphabetical"]
+}

@@ -1,0 +1,184 @@
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs';
+import { join, resolve } from 'path';
+import { getQueueToken } from '@nestjs/bullmq';
+import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
+import { Test, TestingModule } from '@nestjs/testing';
+import openapiTS, { astToString } from 'openapi-typescript';
+import * as prettier from 'prettier';
+import { AppModule } from '../src/app.module';
+import { QUEUES, SystemQueueProcessor } from '../src/core/queue';
+import { REDIS_CLIENT } from '../src/core/redis';
+
+export function generateScalarDocsHtml(title: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title} - API Reference</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <!--suppress HtmlUnknownTarget, JSUnresolvedLibraryURL, MissedLocallyStoredLibrary -->
+  <script
+    id="api-reference"
+    data-url="./openapi.json"
+    src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"
+  ></script>
+</body>
+</html>
+`;
+}
+
+function generateHelperExports(document: OpenAPIObject): string {
+  const schemas = document.components?.schemas;
+  const schemaEntries = schemas ? Object.keys(schemas) : [];
+
+  const aliasLines: string[] = [];
+
+  for (const name of schemaEntries) {
+    aliasLines.push(`export type ${name} = components['schemas']['${name}'];`);
+    if (name.endsWith('Dto')) {
+      const shortName = name.slice(0, -3);
+      if (!schemaEntries.includes(shortName)) {
+        aliasLines.push(`export type ${shortName} = ${name};`);
+      }
+    }
+  }
+
+  const lines: string[] = [
+    '// Helper types and aliases for convenient client consumption',
+    "export type Schema<T extends keyof components['schemas']> = components['schemas'][T];",
+    '',
+    ...aliasLines,
+    '',
+    'export const API_INFO = {',
+    `  title: ${JSON.stringify(document.info.title)},`,
+    `  version: ${JSON.stringify(document.info.version)},`,
+    '};',
+  ];
+
+  return `\n${lines.join('\n')}\n`;
+}
+
+export async function formatWithPrettier(content: string): Promise<string> {
+  const prettierOptions = await prettier.resolveConfig(process.cwd());
+  return prettier.format(content, {
+    ...prettierOptions,
+    parser: 'typescript',
+  });
+}
+
+export async function generateApiTypes(targetDir?: string): Promise<string> {
+  const outputDirectory = targetDir || resolve(__dirname, '../../../packages/contracts/src');
+  const docsApiDir = resolve(__dirname, '../../../Docs/api');
+
+  const moduleFixture: TestingModule = await Test.createTestingModule({
+    imports: [AppModule],
+  })
+    .overrideProvider(REDIS_CLIENT)
+    .useValue({
+      get: () => Promise.resolve(null),
+      set: () => Promise.resolve('OK'),
+      del: () => Promise.resolve(1),
+      quit: () => Promise.resolve('OK'),
+      disconnect: () => {},
+      on: () => {},
+      once: () => {},
+      removeListener: () => {},
+    })
+    .overrideProvider(SystemQueueProcessor)
+    .useValue({
+      process: () => Promise.resolve({ status: 'healthy', timestamp: '' }),
+      onModuleDestroy: () => Promise.resolve(),
+      onApplicationShutdown: () => Promise.resolve(),
+    })
+    .overrideProvider(getQueueToken(QUEUES.SYSTEM))
+    .useValue({
+      opts: {
+        connection: {
+          host: 'localhost',
+          port: 6379,
+          lazyConnect: true,
+          maxRetriesPerRequest: null,
+          enableReadyCheck: false,
+        },
+      },
+      add: () => Promise.resolve({ id: 'mock-id' }),
+      isPaused: () => Promise.resolve(false),
+      close: () => Promise.resolve(),
+      on: () => {},
+      once: () => {},
+      removeListener: () => {},
+    })
+    .compile();
+
+  const app = moduleFixture.createNestApplication();
+  app.setGlobalPrefix('api');
+
+  const config = new DocumentBuilder()
+    .setTitle('Atiesh Codex API')
+    .setDescription('REST and WebSocket API specification for Atiesh Codex services')
+    .setVersion('1.0.0')
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  await app.close();
+
+  const specJson = JSON.stringify(document, null, 2);
+
+  // Save OpenAPI JSON spec and structured HTML documentation to Docs/api/
+  try {
+    mkdirSync(docsApiDir, { recursive: true });
+    writeFileSync(join(docsApiDir, 'openapi.json'), specJson, 'utf-8');
+    const docsHtml = generateScalarDocsHtml(document.info.title);
+    writeFileSync(join(docsApiDir, 'index.html'), docsHtml, 'utf-8');
+  } catch (err) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.warn(`Could not output Docs/api structured docs: ${errorMsg}`);
+  }
+
+  // Generate TypeScript definitions using standard openapi-typescript
+  const ast = await openapiTS(specJson);
+  const openapiTypes = astToString(ast);
+  const helperExports = generateHelperExports(document);
+
+  const rawTsContent = `/**
+ * This file was auto-generated by openapi-typescript from backend OpenAPI schemas.
+ * Do not edit this file directly.
+ * Generated at: ${new Date().toISOString()}
+ */
+
+${openapiTypes}
+
+${helperExports}
+`;
+
+  const tsContent = await formatWithPrettier(rawTsContent);
+
+  // Clear destination before generating to ensure up-to-date files
+  if (existsSync(outputDirectory)) {
+    rmSync(outputDirectory, { recursive: true, force: true });
+  }
+  mkdirSync(outputDirectory, { recursive: true });
+  const outputFile = join(outputDirectory, 'index.ts');
+  writeFileSync(outputFile, tsContent, 'utf-8');
+
+  return outputFile;
+}
+
+if (require.main === module) {
+  generateApiTypes()
+    .then((file) => {
+      console.log(`Successfully generated server API TypeScript types at: ${file}`);
+    })
+    .catch((err) => {
+      console.error('Failed to generate server API types:', err);
+      process.exit(1);
+    });
+}

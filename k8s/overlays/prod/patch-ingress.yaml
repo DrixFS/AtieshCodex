@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: atiesh-codex-ingress
+spec:
+  tls:
+    - hosts:
+        - atieshcodex.com
+        - app.atieshcodex.com
+      secretName: atiesh-codex-production-tls
+  rules:
+    - host: atieshcodex.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: atiesh-codex-server
+                port:
+                  number: 3001
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: atiesh-codex-client
+                port:
+                  number: 80

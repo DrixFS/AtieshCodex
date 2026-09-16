@@ -1,0 +1,92 @@
+{
+  "name": "atiesh-codex-root",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Atiesh Codex - Monorepo for Web Application, Server API, and Component Library",
+  "scripts": {
+    "setup": "pnpm install && pnpm run generate:api-types && pnpm run build",
+    "setup:clean": "pnpm run clean && pnpm install --force && pnpm run generate:api-types && pnpm run build",
+    "dev": "pnpm --parallel run dev",
+    "dev:server": "pnpm --filter server run dev",
+    "dev:client": "pnpm --filter client run dev",
+    "dev:storybook": "pnpm --filter @atiesh/components run dev",
+    "dev:debug": "pnpm --filter server run dev:debug",
+    "build": "turbo run build",
+    "build:server": "turbo run build --filter=server",
+    "build:client": "turbo run build --filter=client",
+    "build:components": "turbo run build --filter=@atiesh/components",
+    "build:contracts": "turbo run build --filter=@atiesh/contracts",
+    "build:storybook": "turbo run build:storybook --filter=@atiesh/components",
+    "build:docs": "node scripts/build-docs.mjs",
+    "preview:client": "pnpm --filter client run preview",
+    "preview:docs": "node scripts/serve-docs.mjs",
+    "generate:api-types": "pnpm --filter server run generate:api-types",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "clean": "turbo run clean && node -e \"fs.rmSync('Docs', { recursive: true, force: true }); fs.rmSync('dist-docs', { recursive: true, force: true })\"",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint . --max-warnings 0",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "turbo run typecheck",
+    "typewatch": "pnpm --parallel run typewatch",
+    "test": "turbo run test",
+    "test:server": "turbo run test --filter=server",
+    "test:client": "turbo run test --filter=client",
+    "test:components": "turbo run test --filter=@atiesh/components",
+    "test:cov": "turbo run test:cov",
+    "test:visual": "pnpm --filter @atiesh/components run test:visual",
+    "test:visual:update": "pnpm --filter @atiesh/components run test:visual:update",
+    "test:watch": "pnpm --parallel run test:watch",
+    "check:circular": "turbo run check:circular",
+    "check:circular:server": "turbo run check:circular --filter=server",
+    "check:circular:client": "turbo run check:circular --filter=client",
+    "check:circular:components": "turbo run check:circular --filter=@atiesh/components",
+    "validate": "pnpm run format:check && pnpm run lint && pnpm run check:circular && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run build:docs",
+    "audit": "pnpm audit --prod",
+    "prepare": "husky",
+    "pre-commit": "lint-staged --relative",
+    "pre-push": "pnpm run check:circular",
+    "start": "pnpm --filter server run start",
+    "docker:build": "docker compose build",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down"
+  },
+  "keywords": [
+    "world-of-warcraft",
+    "typescript",
+    "react",
+    "nestjs"
+  ],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@12.4.1",
+  "devDependencies": {
+    "@changesets/cli": "^2.27.12",
+    "@eslint/js": "catalog:",
+    "@types/node": "catalog:",
+    "dpdm": "catalog:",
+    "eslint": "catalog:",
+    "eslint-config-prettier": "catalog:",
+    "eslint-plugin-react": "catalog:",
+    "eslint-plugin-react-hooks": "catalog:",
+    "globals": "catalog:",
+    "husky": "catalog:",
+    "lint-staged": "catalog:",
+    "prettier": "catalog:",
+    "turbo": "catalog:",
+    "typescript": "catalog:",
+    "typescript-eslint": "catalog:"
+  },
+  "overrides": {
+    "multer": "^2.4.0"
+  },
+  "lint-staged": {
+    "*.{js,ts,tsx,json,css,md,yaml,yml}": [
+      "prettier --write"
+    ],
+    "*.{js,ts,tsx}": [
+      "eslint --max-warnings 0"
+    ]
+  }
+}

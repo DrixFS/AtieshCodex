@@ -1,0 +1,47 @@
+{
+  "name": "client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Atiesh Codex - React TypeScript Frontend",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\"",
+    "docs": "typedoc",
+    "preview": "vite preview",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "check:circular": "dpdm --exit-code circular:1 --warning=false --tree=false \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "typewatch": "tsc --noEmit --watch"
+  },
+  "dependencies": {
+    "@atiesh/components": "workspace:*",
+    "@atiesh/contracts": "workspace:*",
+    "@tanstack/react-query": "^5.102.8",
+    "mobx": "^7.0.3",
+    "mobx-react-lite": "^5.0.3",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.18.3",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@swc/core": "catalog:",
+    "@swc/jest": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@testing-library/react": "catalog:",
+    "@types/jest": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jest": "catalog:",
+    "jest-environment-jsdom": "catalog:",
+    "jsdom": "catalog:",
+    "typedoc": "^0.28.20",
+    "typescript": "catalog:",
+    "vite": "catalog:"
+  }
+}

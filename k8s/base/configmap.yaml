@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: atiesh-codex-config
+  namespace: atiesh-codex
+  labels:
+    app.kubernetes.io/name: atiesh-codex-config
+    app.kubernetes.io/part-of: atiesh-codex-app
+data:
+  NODE_ENV: 'production'
+  PORT: '3001'
+  REDIS_HOST: 'atiesh-codex-redis'
+  REDIS_PORT: '6379'
+  REDIS_DB: '0'
+  QUEUE_PREFIX: 'atiesh_codex_queue'

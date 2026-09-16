@@ -1,0 +1,9 @@
+{
+  "extends": "../../packages/tsconfig/node.json",
+  "compilerOptions": {
+    "strictPropertyInitialization": false,
+    "strictBindCallApply": true,
+    "types": ["node", "jest"]
+  },
+  "include": ["src/**/*", "scripts/**/*"]
+}

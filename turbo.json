@@ -1,0 +1,60 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalEnv": ["NODE_ENV", "CI", "PORT", "API_URL", "DATABASE_URL", "REDIS_HOST", "REDIS_PORT"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "package.json", "tsconfig*.json", "vite.config.*", "nest-cli.json"],
+      "outputs": ["dist/**"]
+    },
+    "build:storybook": {
+      "inputs": [".storybook/**", "src/**", "package.json", "tsconfig*.json"],
+      "outputs": ["../../Docs/storybook/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "scripts/**",
+        "test/**",
+        "package.json",
+        "tsconfig*.json",
+        "jest.config.*"
+      ],
+      "outputs": []
+    },
+    "test:cov": {
+      "dependsOn": ["^build"],
+      "inputs": [
+        "src/**",
+        "scripts/**",
+        "test/**",
+        "package.json",
+        "tsconfig*.json",
+        "jest.config.*"
+      ],
+      "outputs": ["coverage/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["src/**", "scripts/**", "test/**", "package.json", "tsconfig*.json"],
+      "outputs": []
+    },
+    "check:circular": {
+      "inputs": ["src/**", "package.json", "tsconfig*.json"],
+      "outputs": []
+    },
+    "generate:api-types": {
+      "inputs": ["src/**", "scripts/**", "package.json", "tsconfig*.json", "nest-cli.json"],
+      "outputs": ["../../packages/contracts/src/**", "../../Docs/api/**"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

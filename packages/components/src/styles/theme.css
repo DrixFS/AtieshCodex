@@ -1,0 +1,36 @@
+:root {
+  --atiesh-color-gold: #c69b3d;
+  --atiesh-color-gold-light: #dfb85a;
+  --atiesh-color-gold-dark: #8c6b22;
+  --atiesh-color-gold-glow: rgba(198, 155, 61, 0.4);
+
+  --atiesh-color-arcane: #0078ff;
+  --atiesh-color-arcane-dark: #004b9e;
+  --atiesh-color-arcane-glow: rgba(0, 120, 255, 0.35);
+
+  --atiesh-color-crimson: #b31b1b;
+  --atiesh-color-crimson-dark: #7a1212;
+  --atiesh-color-crimson-glow: rgba(179, 27, 27, 0.35);
+
+  --atiesh-color-bg-dark: #0f172a;
+  --atiesh-color-bg-surface: #1e293b;
+  --atiesh-color-bg-card: #182234;
+  --atiesh-color-border: #334155;
+  --atiesh-color-text-primary: #f8fafc;
+  --atiesh-color-text-secondary: #94a3b8;
+  --atiesh-color-text-muted: #64748b;
+
+  --atiesh-color-success: #22c55e;
+  --atiesh-color-warning: #eab308;
+  --atiesh-color-danger: #ef4444;
+  --atiesh-color-info: #38bdf8;
+
+  --atiesh-font-family:
+    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --atiesh-radius-sm: 4px;
+  --atiesh-radius-md: 8px;
+  --atiesh-radius-lg: 12px;
+  --atiesh-radius-full: 9999px;
+
+  --atiesh-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}

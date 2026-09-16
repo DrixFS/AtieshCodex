@@ -1,0 +1,29 @@
+node_modules/
+dist/
+dist-storybook/
+dist-docs/
+Docs/
+storybook-static/
+coverage/
+test-results/
+playwright-report/
+blob-report/
+*.log
+.pnpm-store/
+.output.txt
+.eslintcache
+*.tsbuildinfo
+.turbo/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+!.env.example
+
+# OS / Editor files
+.DS_Store
+Thumbs.db

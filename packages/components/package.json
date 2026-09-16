@@ -1,0 +1,54 @@
+{
+  "name": "@atiesh/components",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Atiesh Codex - Web Components Library & Storybook",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./dist": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./theme.css": "./src/styles/theme.css"
+  },
+  "scripts": {
+    "dev": "storybook dev -p 6006",
+    "build": "tsc && vite build",
+    "build:storybook": "storybook build -o ../../Docs/storybook",
+    "clean": "node -e \"fs.rmSync('dist', { recursive: true, force: true }); fs.rmSync('dist-storybook', { recursive: true, force: true })\"",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:visual": "pnpm run build:storybook && playwright test",
+    "test:visual:update": "pnpm run build:storybook && playwright test --update-snapshots",
+    "check:circular": "dpdm --exit-code circular:1 --warning=false --tree=false \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "typewatch": "tsc --noEmit --watch"
+  },
+  "devDependencies": {
+    "@storybook/addon-essentials": "^8.6.4",
+    "@storybook/addon-links": "^8.6.4",
+    "@storybook/web-components": "^8.6.4",
+    "@storybook/web-components-vite": "^8.6.4",
+    "@playwright/test": "catalog:",
+    "@swc/core": "catalog:",
+    "@swc/jest": "catalog:",
+    "@testing-library/jest-dom": "catalog:",
+    "@types/jest": "catalog:",
+    "jest": "catalog:",
+    "jest-environment-jsdom": "catalog:",
+    "lit": "^3.2.1",
+    "storybook": "^8.6.4",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "^4.5.3"
+  }
+}

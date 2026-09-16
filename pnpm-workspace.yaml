@@ -1,0 +1,44 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+catalog:
+  typescript: ^5.7.3
+  prettier: ^3.9.6
+  eslint: ^10.10.0
+  '@eslint/js': ^10.0.1
+  typescript-eslint: ^8.70.0
+  eslint-config-prettier: ^10.1.8
+  '@types/node': ^22.10.7
+  jest: ^29.7.0
+  '@types/jest': ^29.5.14
+  '@swc/jest': ^0.2.39
+  '@swc/core': ^1.16.2
+  jest-environment-jsdom: ^29.7.0
+  '@testing-library/jest-dom': ^7.0.1
+  '@testing-library/react': ^16.3.3
+  '@types/react': ^19.0.8
+  '@types/react-dom': ^19.0.3
+  zod: ^4.6.5
+  turbo: ^2.10.13
+  dpdm: ^4.3.0
+  husky: ^9.1.7
+  lint-staged: ^17.5.1
+  vite: ^6.0.11
+  ts-node: ^10.9.2
+  jsdom: ^26.0.0
+  eslint-plugin-react: ^7.37.4
+  eslint-plugin-react-hooks: ^5.1.0
+  globals: ^15.14.0
+  '@playwright/test': ^1.50.1
+
+overrides:
+  multer: ^2.4.0
+
+allowBuilds:
+  '@parcel/watcher': true
+  '@scarf/scarf': true
+  '@swc/core': true
+  esbuild: true
+  msgpackr-extract: true
+  unrs-resolver: true

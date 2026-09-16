@@ -1,0 +1,11 @@
+{
+  "name": "@atiesh/tsconfig",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shared TypeScript configurations for Atiesh Codex",
+  "files": [
+    "base.json",
+    "react.json",
+    "node.json"
+  ]
+}

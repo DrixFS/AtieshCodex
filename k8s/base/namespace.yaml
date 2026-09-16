@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: atiesh-codex
+  labels:
+    name: atiesh-codex
+    app.kubernetes.io/part-of: atiesh-codex
