@@ -39,6 +39,7 @@ atiesh-codex/
 │       ├── Dockerfile      # Turbo prune multi-stage production build (Node.js)
 │       ├── nest-cli.json   # Nest CLI configuration (Swagger plugin)
 │       ├── package.json    # Server package manifest & scripts
+│       ├── tsconfig.build.json # TypeScript build compiler options (excludes scripts & tests)
 │       └── tsconfig.json   # TypeScript configuration (extends @atiesh/tsconfig/node)
 ├── packages/
 │   ├── components/         # Reusable Web Components Library & Storybook (@atiesh/components)

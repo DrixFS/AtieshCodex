@@ -66,6 +66,7 @@ apps/server/
 ├── Dockerfile              # Turbo prune multi-stage production container build
 ├── nest-cli.json           # NestJS CLI configuration (includes Swagger plugin)
 ├── package.json            # Package dependencies and server-specific scripts
+├── tsconfig.build.json     # Production TypeScript compiler options (excludes scripts & tests, emits to dist/)
 └── tsconfig.json           # Strict TypeScript compiler options (extends @atiesh/tsconfig/node)
 ```
 
