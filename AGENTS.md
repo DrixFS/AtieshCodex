@@ -10,6 +10,10 @@ Atiesh Codex is a modern, modular web application structured as a monorepo manag
 
 ```text
 atiesh-codex/
+├── .github/
+│   └── workflows/          # GitHub Actions CI/CD and deployment workflows
+│       ├── ci-cd.yml       # Monorepo CI/CD validation & release pipeline
+│       └── deploy-docs.yml # Automated GitHub Pages documentation deployment on release
 ├── apps/
 │   ├── client/             # Pure React 19 Single-Page Application (SPA)
 │   │   ├── src/
@@ -73,6 +77,7 @@ atiesh-codex/
 ├── scripts/                # Monorepo build and documentation serving scripts
 ├── .changeset/             # Changeset release management
 ├── .env.example            # Root environment variables template
+├── .gitattributes          # Line ending (LF) and binary file attributes configuration
 ├── AGENTS.md               # Monorepo-wide agent guide and architectural reference
 ├── docker-compose.yml      # Local container orchestration
 ├── eslint.config.mjs       # Workspace-wide ESLint root configuration
@@ -204,7 +209,10 @@ All primary developer operations are orchestrated from the root using `pnpm`:
 
 | Command                              | Description                                                                         |
 | ------------------------------------ | ----------------------------------------------------------------------------------- |
-| `pnpm run validate`                  | **Full CI pipeline**: runs format check, lint, circular check, typecheck, and tests |
+| `pnpm run validate`                  | **Full CI pipeline**: runs line separator check, format check, lint, circular check, typecheck, and tests |
+| `pnpm run eol`                       | Automatically normalize all line separators to LF across workspace                 |
+| `pnpm run eol:fix`                   | Automatically fix and convert line separators to LF across workspace                |
+| `pnpm run eol:check`                 | Check all files against LF line separator rules across workspace                    |
 | `pnpm run format`                    | Auto-format all files across workspace using Prettier                               |
 | `pnpm run format:check`              | Check all files against Prettier formatting rules                                   |
 | `pnpm run lint`                      | Run ESLint across all packages with zero warnings allowed (`--max-warnings 0`)      |
@@ -326,23 +334,36 @@ pnpm run validate
 
 This ensures:
 
-1. `Prettier` code style compliance.
-2. `ESLint` passing with 0 errors and 0 warnings (enforced by `--max-warnings 0`, including 0 `any` usage and zero unresolved warnings).
-3. Zero circular dependencies detected across all workspace packages via `dpdm` (`pnpm run check:circular`).
-4. `TypeScript` strict compilation with 0 type errors.
-5. All `Jest` unit/integration test suites and `Playwright` visual regression suites pass.
-6. Husky git hooks enforce code formatting on `pre-commit` and circular dependency checks on `pre-push`.
-7. Production builds for `server` and `client` succeed.
-8. CI/CD will fail and halt all builds and releases if any warning or error is detected.
+1. `Line separators` LF compliance across all files (`pnpm run eol:check`).
+2. `Prettier` code style compliance.
+3. `ESLint` passing with 0 errors and 0 warnings (enforced by `--max-warnings 0`, including 0 `any` usage and zero unresolved warnings).
+4. Zero circular dependencies detected across all workspace packages via `dpdm` (`pnpm run check:circular`).
+5. `TypeScript` strict compilation with 0 type errors.
+6. All `Jest` unit/integration test suites and `Playwright` visual regression suites pass.
+7. Husky git hooks enforce line separator normalization and code formatting on `pre-commit` and circular dependency checks on `pre-push`.
+8. Production builds for `server` and `client` succeed.
+9. CI/CD will fail and halt all builds and releases if any warning or error is detected.
 
-### 10. Automatic AGENTS.md & Documentation Maintenance
+### 10. Documentation & GitHub Pages Deployment Workflow
+
+- **Unified Documentation Hub**:
+  - The static documentation portal is generated into `Docs/` by `pnpm run build:docs` and previews locally via `pnpm run preview:docs`.
+  - Aggregates server OpenAPI/Swagger specs, client TypeDoc reference, and Web Components Storybook design system into a single portal (`Docs/index.html`).
+- **Automated Deployment via Release Pipeline**:
+  - The CI/CD pipeline (`.github/workflows/ci-cd.yml`) automatically builds and archives documentation as `docs-dist`.
+  - Upon completing the production release on the `master` branch, the `deploy-docs` job downloads the artifact and deploys it directly to GitHub Pages (`actions/deploy-pages@v4` on environment `github-pages`). Deployments originating from other branches are skipped to satisfy environment protection rules.
+- **Manual On-Demand Deployment (`.github/workflows/deploy-docs.yml`)**:
+  - Developers can trigger manual deployments from the GitHub Actions tab via `workflow_dispatch`.
+  - An optional `release_tag` input allows checking out and publishing documentation for a specific release tag or branch.
+
+### 11. Automatic AGENTS.md & Documentation Maintenance
 
 - **Mandatory Self-Updating Documentation**:
   - Whenever implementing a change, refactoring, adding a feature, updating a workflow, modifying configuration/environment variables, or altering commands, developers and AI agents must automatically update the relevant `AGENTS.md` file(s) (`AGENTS.md`, `server/AGENTS.md`, `client/AGENTS.md`, `components/AGENTS.md`).
   - Any change made that affects information already documented in any `AGENTS.md` file, or introduces new concepts, conventions, patterns, endpoints, or architectures that should be documented in them, must be reflected immediately in the documentation as part of the same task.
   - Never allow `AGENTS.md` documentation to become stale or outdated.
 
-### 11. Specialized Guidelines
+### 12. Specialized Guidelines
 
 In addition to this root guide, domain-specific guides are available in their respective workspace packages:
 

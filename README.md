@@ -25,7 +25,7 @@ Before setting up the project, ensure you have the following installed on your m
 
 ```bash
 git clone https://github.com/DrixFS/AtieshCodex
-cd atiesh-codex
+cd AtieshCodex
 ```
 
 ### 2. Install and Setup
@@ -126,7 +126,10 @@ All primary developer operations are orchestrated from the root workspace using 
 
 | Command                              | Description                                                                         |
 | ------------------------------------ | ----------------------------------------------------------------------------------- |
-| `pnpm run validate`                  | **Full CI pipeline**: runs format check, lint, circular check, typecheck, and tests |
+| `pnpm run validate`                  | **Full CI pipeline**: runs line separator check, format check, lint, circular check, typecheck, and tests |
+| `pnpm run eol`                       | Automatically normalize all line separators to LF across workspace                 |
+| `pnpm run eol:fix`                   | Automatically fix and convert line separators to LF across workspace                |
+| `pnpm run eol:check`                 | Check all files against LF line separator rules across workspace                    |
 | `pnpm run format`                    | Auto-format all files across workspace using Prettier                               |
 | `pnpm run format:check`              | Check all files against Prettier formatting rules                                   |
 | `pnpm run lint`                      | Run ESLint across all packages with zero warnings allowed (`--max-warnings 0`)      |
@@ -181,6 +184,7 @@ The repository is configured with automated GitHub Actions CI/CD (`.github/workf
 1. **Continuous Integration (PR & Branch Validation)**:
    - Full automated quality checks executed as dedicated steps:
      - OpenAPI client contract generation verification (`pnpm run generate:api-types`).
+     - Line separator LF consistency check (`pnpm run eol:check`).
      - Prettier code style formatting check (`pnpm run format:check`).
      - ESLint linting with strict typing (0 errors and 0 warnings allowed via `--max-warnings 0`).
      - Circular dependency detection via `dpdm` (`pnpm run check:circular`).
@@ -201,6 +205,11 @@ The repository is configured with automated GitHub Actions CI/CD (`.github/workf
      - `docker-compose.prod.yml` & `.env.production.example`: Production docker compose templates.
      - `SHA256SUMS.txt`: SHA-256 integrity checksums for all release archives.
    - **GitHub Release**: Automatically creates tagged GitHub Releases with auto-generated release notes.
+   - **Automated GitHub Pages Documentation**: Deploys the pre-built `docs-dist` artifact directly to GitHub Pages (`github-pages` environment) as the final step of the release pipeline.
+
+3. **Manual Documentation Deployment Workflow (`.github/workflows/deploy-docs.yml`)**:
+   - Supports manual on-demand deployment via `workflow_dispatch` in the Actions tab.
+   - Allows specifying an optional `release_tag` (e.g. `v0.1.0`) to build and deploy documentation from a specific release or tag without triggering a full CI/CD run.
 
 ---
 
@@ -213,7 +222,7 @@ The monorepo features a unified, statically hostable technical documentation hub
 - **Client TypeDoc & TSDoc API Reference**: `Docs/client/index.html`.
 - **Components Storybook Design System**: `Docs/storybook/index.html`.
 
-The documentation hub is completely static (ready for GitHub Pages, S3, Netlify, Nginx, or any static hosting) and is automatically built, validated, and uploaded as an artifact (`docs-dist`) and release asset (`docs-dist.tar.gz`) in GitHub Actions CI/CD (`.github/workflows/ci-cd.yml`).
+The documentation hub is completely static and hosted on **GitHub Pages**. It is automatically deployed upon each production release (`.github/workflows/ci-cd.yml`) and can also be deployed on-demand via the dedicated `.github/workflows/deploy-docs.yml` workflow. In CI/CD, the documentation is built, validated, and archived as an artifact (`docs-dist`) and release asset (`docs-dist.tar.gz`).
 
 ---
 

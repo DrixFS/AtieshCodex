@@ -1,0 +1,88 @@
+name: Deploy Documentation to GitHub Pages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Release version / tag to deploy documentation from (e.g. v0.1.0 or empty for current ref)'
+        required: false
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build Documentation
+    if: |
+      (github.event_name == 'release' && (github.event.release.target_commitish == 'master' || github.event.release.target_commitish == 'refs/heads/master')) ||
+      (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/master' || inputs.release_tag != ''))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Determine Git Ref
+        id: git-ref
+        run: |
+          if [ -n "${{ inputs.release_tag }}" ]; then
+            echo "ref=${{ inputs.release_tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "ref=${{ github.ref }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.git-ref.outputs.ref }}
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Turborepo cache
+        uses: actions/cache@v5
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+
+      - name: Build applications and documentation
+        run: |
+          pnpm run build
+          pnpm run build:docs
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: Docs
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: |
+      (github.event_name == 'release' && (github.event.release.target_commitish == 'master' || github.event.release.target_commitish == 'refs/heads/master')) ||
+      (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/master' || inputs.release_tag != ''))
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
