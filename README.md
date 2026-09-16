@@ -25,7 +25,7 @@ Before setting up the project, ensure you have the following installed on your m
 
 ```bash
 git clone https://github.com/DrixFS/AtieshCodex
-cd atiesh-codex
+cd AtieshCodex
 ```
 
 ### 2. Install and Setup
@@ -126,7 +126,10 @@ All primary developer operations are orchestrated from the root workspace using 
 
 | Command                              | Description                                                                         |
 | ------------------------------------ | ----------------------------------------------------------------------------------- |
-| `pnpm run validate`                  | **Full CI pipeline**: runs format check, lint, circular check, typecheck, and tests |
+| `pnpm run validate`                  | **Full CI pipeline**: runs line separator check, format check, lint, circular check, typecheck, and tests |
+| `pnpm run eol`                       | Automatically normalize all line separators to LF across workspace                 |
+| `pnpm run eol:fix`                   | Automatically fix and convert line separators to LF across workspace                |
+| `pnpm run eol:check`                 | Check all files against LF line separator rules across workspace                    |
 | `pnpm run format`                    | Auto-format all files across workspace using Prettier                               |
 | `pnpm run format:check`              | Check all files against Prettier formatting rules                                   |
 | `pnpm run lint`                      | Run ESLint across all packages with zero warnings allowed (`--max-warnings 0`)      |
@@ -181,6 +184,7 @@ The repository is configured with automated GitHub Actions CI/CD (`.github/workf
 1. **Continuous Integration (PR & Branch Validation)**:
    - Full automated quality checks executed as dedicated steps:
      - OpenAPI client contract generation verification (`pnpm run generate:api-types`).
+     - Line separator LF consistency check (`pnpm run eol:check`).
      - Prettier code style formatting check (`pnpm run format:check`).
      - ESLint linting with strict typing (0 errors and 0 warnings allowed via `--max-warnings 0`).
      - Circular dependency detection via `dpdm` (`pnpm run check:circular`).

@@ -23,6 +23,9 @@ concurrency:
 jobs:
   build:
     name: Build Documentation
+    if: |
+      (github.event_name == 'release' && (github.event.release.target_commitish == 'master' || github.event.release.target_commitish == 'refs/heads/master')) ||
+      (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/master' || inputs.release_tag != ''))
     runs-on: ubuntu-latest
     steps:
       - name: Determine Git Ref
@@ -72,6 +75,9 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
+    if: |
+      (github.event_name == 'release' && (github.event.release.target_commitish == 'master' || github.event.release.target_commitish == 'refs/heads/master')) ||
+      (github.event_name == 'workflow_dispatch' && (github.ref == 'refs/heads/master' || inputs.release_tag != ''))
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -61,6 +61,11 @@ jobs:
         run: pnpm run generate:api-types
         continue-on-error: true
 
+      - name: Check line separators (LF)
+        id: eol
+        run: pnpm run eol:check
+        continue-on-error: true
+
       - name: Check formatting (Prettier)
         id: format
         run: pnpm run format:check
@@ -94,6 +99,7 @@ jobs:
       - name: Enforce Quality Checks Gate
         if: |
           steps.contracts.outcome != 'success' ||
+          steps.eol.outcome != 'success' ||
           steps.format.outcome != 'success' ||
           steps.lint.outcome != 'success' ||
           steps.circular.outcome != 'success' ||
@@ -101,7 +107,7 @@ jobs:
           steps.test.outcome != 'success' ||
           steps.audit.outcome != 'success'
         run: |
-          echo "::error::One or more quality checks (contract sync, format, lint, circular dependencies, typecheck, test, or dependency audit) failed or generated warnings. Halting build and release."
+          echo "::error::One or more quality checks (contract sync, line separators, format, lint, circular dependencies, typecheck, test, or dependency audit) failed or generated warnings. Halting build and release."
           exit 1
 
       - name: Build applications and documentation (Server, Client, Components & Docs)
@@ -110,28 +116,28 @@ jobs:
           pnpm run build:docs
 
       - name: Upload Server Build Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: server-dist
           path: apps/server/dist/
           retention-days: 1
 
       - name: Upload Client Build Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: client-dist
           path: apps/client/dist/
           retention-days: 1
 
       - name: Upload Components Build Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: components-dist
           path: packages/components/dist/
           retention-days: 1
 
       - name: Upload Documentation Build Artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: docs-dist
           path: Docs/
@@ -179,25 +185,25 @@ jobs:
           fetch-depth: 0
 
       - name: Download Server Build Artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: server-dist
           path: apps/server/dist
 
       - name: Download Client Build Artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: client-dist
           path: apps/client/dist
 
       - name: Download Components Build Artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: components-dist
           path: packages/components/dist
 
       - name: Download Documentation Build Artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: docs-dist
           path: Docs
@@ -295,7 +301,7 @@ jobs:
           echo "release_tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
 
       - name: Create / Update GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.package-artifacts.outputs.release_tag }}
           name: Release ${{ steps.package-artifacts.outputs.release_tag }}
@@ -308,6 +314,7 @@ jobs:
   deploy-docs:
     name: Deploy Documentation to GitHub Pages
     needs: release
+    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -318,7 +325,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Download Documentation Build Artifact
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
           name: docs-dist
           path: Docs
