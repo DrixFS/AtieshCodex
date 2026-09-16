@@ -10,6 +10,10 @@ Atiesh Codex is a modern, modular web application structured as a monorepo manag
 
 ```text
 atiesh-codex/
+├── .github/
+│   └── workflows/          # GitHub Actions CI/CD and deployment workflows
+│       ├── ci-cd.yml       # Monorepo CI/CD validation & release pipeline
+│       └── deploy-docs.yml # Automated GitHub Pages documentation deployment on release
 ├── apps/
 │   ├── client/             # Pure React 19 Single-Page Application (SPA)
 │   │   ├── src/
