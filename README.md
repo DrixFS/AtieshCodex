@@ -24,7 +24,7 @@ Before setting up the project, ensure you have the following installed on your m
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/DrixFS/AtieshCodex
 cd atiesh-codex
 ```
 
@@ -57,8 +57,8 @@ All primary developer operations are orchestrated from the root workspace using 
 > **CLI Shortcut Tips**:
 >
 > - In `pnpm`, the `run` keyword is optional for root scripts: you can type `pnpm build:client` instead of `pnpm run build:client`.
-> - Use the `-F` shorthand for `--filter`: `pnpm -F client dev`, `pnpm -F server test`, `pnpm -F @atiesh/components storybook`.
-> - You can also navigate directly into any package folder (`cd client`, `cd server`, `cd components`) and run `pnpm build`, `pnpm dev`, or `pnpm test`.
+> - Use the `-F` shorthand for `--filter`: `pnpm -F client dev`, `pnpm -F server test`, `pnpm -F @atiesh/components dev`.
+> - You can also navigate directly into any package folder (`cd apps/client`, `cd apps/server`, `cd packages/components`) and run `pnpm build`, `pnpm dev`, or `pnpm test`.
 
 ### Setup & Installation
 
@@ -74,7 +74,7 @@ All primary developer operations are orchestrated from the root workspace using 
 | ------------------------ | -------------------------------------------------------------------- |
 | `pnpm run dev`           | Start development servers in parallel with hot reload                |
 | `pnpm run dev:server`    | Start only the NestJS backend with watch mode                        |
-| `pnpm run dev:client`    | Start only the Vite frontend dev server                              |
+| `pnpm run dev:client`    | Start only the Vite frontend dev server (port 3000)                  |
 | `pnpm run dev:storybook` | Start the Storybook component explorer on port `6006`                |
 | `pnpm run dev:debug`     | Start the NestJS backend in debug mode with inspector on port `9229` |
 
@@ -94,22 +94,27 @@ All primary developer operations are orchestrated from the root workspace using 
 
 ### Testing
 
-| Command                    | Description                                                                |
-| -------------------------- | -------------------------------------------------------------------------- |
-| `pnpm run test`            | Run all test suites across server (Jest), client (Jest), components (Jest) |
-| `pnpm run test:server`     | Run backend unit and integration tests                                     |
-| `pnpm run test:client`     | Run frontend unit and component tests                                      |
-| `pnpm run test:components` | Run Web Components unit tests with Jest                                    |
-| `pnpm run test:watch`      | Run all tests in interactive watch mode across packages                    |
+| Command                       | Description                                                                |
+| ----------------------------- | -------------------------------------------------------------------------- |
+| `pnpm run test`               | Run all test suites across server (Jest), client (Jest), components (Jest) |
+| `pnpm run test:server`        | Run backend unit and integration tests                                     |
+| `pnpm run test:client`        | Run frontend unit and component tests                                      |
+| `pnpm run test:components`    | Run Web Components unit tests with Jest                                    |
+| `pnpm run test:cov`           | Run all Jest test suites with coverage report across packages              |
+| `pnpm run test:visual`        | Run Storybook visual regression tests with Playwright                      |
+| `pnpm run test:visual:update` | Update Storybook baseline visual snapshots with Playwright                 |
+| `pnpm run test:watch`         | Run all tests in interactive watch mode across packages                    |
+| `pnpm run pre-push`           | Pre-push verification gate running circular checks                         |
 
 ### Building & Production
 
 | Command                     | Description                                                                |
 | --------------------------- | -------------------------------------------------------------------------- |
 | `pnpm run build`            | Compile TypeScript and build production bundles for all workspace packages |
-| `pnpm run build:server`     | Build backend NestJS application (`server/dist/`)                          |
-| `pnpm run build:client`     | Build frontend static SPA bundle (`client/dist/`)                          |
-| `pnpm run build:components` | Build Web Components library (`components/dist/`)                          |
+| `pnpm run build:server`     | Build backend NestJS application (`apps/server/dist/`)                      |
+| `pnpm run build:client`     | Build frontend static SPA bundle (`apps/client/dist/`)                      |
+| `pnpm run build:components` | Build Web Components library (`packages/components/dist/`)                 |
+| `pnpm run build:contracts`  | Build auto-generated API contracts workspace package                       |
 | `pnpm run build:storybook`  | Build static Storybook site (`Docs/storybook/`)                            |
 | `pnpm run build:docs`       | Build unified monorepo documentation hub (`Docs/`)                         |
 | `pnpm run preview:docs`     | Preview the unified documentation hub locally on port `4000`               |
@@ -132,15 +137,16 @@ All primary developer operations are orchestrated from the root workspace using 
 | `pnpm run check:circular:components` | Check circular dependencies in Web Components library                               |
 | `pnpm run typecheck`                 | Run TypeScript type checks (`tsc --noEmit`) across all packages                     |
 | `pnpm run typewatch`                 | Run TypeScript type checks in watch mode across packages                            |
+| `pnpm run audit`                     | Audit production dependencies for security vulnerabilities                          |
 
 #### Type Safety & Linting Policy
 
 - **No `any` Typing**: The `any` type is strictly forbidden across the codebase (`@typescript-eslint/no-explicit-any: "error"` and TypeScript strict flags enabled).
 - **`as` Type Assertions**: Type casting via `as Type` is strictly forbidden and generates a linter error (`@typescript-eslint/consistent-type-assertions: ["error", { "assertionStyle": "never" }]`) to encourage safe typing, type narrowing, and runtime validation.
 - **Runtime Environment Validation & Templates**:
-  - **Server**: Typed configuration loader and schema validation powered by `@nestjs/config` (`server/src/core/config/`).
-  - **Client**: Zod runtime schema parser (`client/src/core/config/env.ts`) ensuring fail-fast verification of `VITE_*` variables and safe typed configuration.
-  - **Templates**: Root `.env.example` provides unified full-stack orchestration defaults, while package-scoped `server/.env.example` and `client/.env.example` document package-specific variables.
+  - **Server**: Typed configuration loader and schema validation powered by `@nestjs/config` (`apps/server/src/core/config/`).
+  - **Client**: Zod runtime schema parser (`apps/client/src/core/config/env.ts`) ensuring fail-fast verification of `VITE_*` variables and safe typed configuration.
+  - **Templates**: Root `.env.example` provides unified full-stack orchestration defaults, while package-scoped `apps/server/.env.example` and `apps/client/.env.example` document package-specific variables.
   - **Security**: All runtime `.env` files (`.env`, `.env.local`, `.env.*.local`) are ignored in `.gitignore`.
 
 ### Docker & Containerization
@@ -179,7 +185,7 @@ The repository is configured with automated GitHub Actions CI/CD (`.github/workf
      - ESLint linting with strict typing (0 errors and 0 warnings allowed via `--max-warnings 0`).
      - Circular dependency detection via `dpdm` (`pnpm run check:circular`).
      - TypeScript compiler type checks (`tsc --noEmit`).
-     - Jest and Vitest automated test suites.
+     - Jest automated test suites.
    - Quality checks gate ensures all stages complete and pass before allowing production compilation.
    - If any warnings or errors are present, the workflow immediately halts and skips subsequent build, Docker, and release jobs.
    - Compiles production bundles, validates Kubernetes manifests (`kustomize`), and tests Docker Compose configuration.
@@ -224,7 +230,7 @@ When the backend development server is running (`pnpm run dev` or `pnpm run dev:
 
 This section outlines best practices, architectural compliance, and practical developer hints and tips for working across the monorepo workspaces.
 
-### Client (`client/`)
+### Client (`apps/client/`)
 
 The frontend is a pure Single-Page Application (SPA) built with **React 19**, **TypeScript 5**, and **Vite 6**.
 
@@ -245,11 +251,11 @@ The frontend is a pure Single-Page Application (SPA) built with **React 19**, **
 
 - **Consuming Web Components**:
   - Web components from `@atiesh/components` are available directly in JSX/TSX.
-  - When a new web component is added in `components/`, ensure its JSX typings are declared in `components/src/types/jsx.d.ts` so TypeScript recognizes the custom element tag seamlessly in React.
+  - When a new web component is added in `packages/components/`, ensure its JSX typings are declared in `packages/components/src/types/jsx.d.ts` so TypeScript recognizes the custom element tag seamlessly in React.
 - **API Client Integration**:
   - Use the preconfigured `apiClient` instance (`src/core/api/`) which handles baseline headers, correlation IDs, JSON serialization, and `ApiClientError` throwing.
 - **Hot Reloading & Fast Feedback**:
-  - Run `pnpm dev:client` (or `pnpm -F client dev`) to start Vite on port `5173`.
+  - Run `pnpm dev:client` (or `pnpm -F client dev`) to start Vite on port `3000`.
   - Vite is configured with automatic proxying to `http://localhost:3001` for `/api` routes during local development.
 - **Strict Type Safety**:
   - Avoid `any` and avoid `as Type` type assertions (both are rejected by ESLint). Prefer type guards, discriminated unions, and safe parsing with Zod (`src/core/config/env.ts`).
@@ -258,7 +264,7 @@ The frontend is a pure Single-Page Application (SPA) built with **React 19**, **
 
 ---
 
-### Server (`server/`)
+### Server (`apps/server/`)
 
 The backend is a modular REST/WebSocket API service built with **NestJS 11** and **TypeScript 5**.
 
@@ -294,7 +300,7 @@ The backend is a modular REST/WebSocket API service built with **NestJS 11** and
 
 ---
 
-### Components (`components/`)
+### Components (`packages/components/`)
 
 The design system is a standalone, framework-agnostic **Web Components library** built with **Lit 3**, **TypeScript 5**, **Vite 6**, and **Storybook 8** (`@atiesh/components`).
 
@@ -303,7 +309,7 @@ The design system is a standalone, framework-agnostic **Web Components library**
 - **Component Module Anatomy**:
   - Isolate each custom element in its own folder under `src/components/<component-name>/`:
     - `<name>.ts`: Lit component class definition extending `LitElement`.
-    - `<name>.test.ts`: Vitest component unit tests with JSDOM.
+    - `<name>.test.ts`: Jest component unit tests with JSDOM.
     - `<name>.stories.ts`: Interactive Storybook documentation and variant controls.
     - `index.ts`: Local barrel export for the component and its types.
   - Re-export the component in `src/index.ts`.
@@ -320,14 +326,14 @@ The design system is a standalone, framework-agnostic **Web Components library**
 
 - **Live Workspace Hot-Reloading (HMR)**:
   - `@atiesh/components` exports point directly to TypeScript source (`./src/index.ts`) and CSS (`./src/styles/theme.css`).
-  - When developing in the client (`pnpm dev:client`), any edit made to components or styles in `components/src/` hot-reloads instantly without needing a manual rebuild or bundling step.
+  - When developing in the client (`pnpm dev:client`), any edit made to components or styles in `packages/components/src/` hot-reloads instantly without needing a manual rebuild or bundling step.
 - **Storybook-Driven Development**:
   - Develop UI primitives in isolation using `pnpm dev:storybook` (runs Storybook on `http://localhost:6006`).
   - Cover all component variants, sizes, and interactive states with Storybook controls.
 - **React JSX Compatibility**:
-  - Whenever creating a new custom element, add its tag definition and attribute types to `src/types/jsx.d.ts` so consuming React applications have full autocomplete and type safety.
+  - Whenever creating a new custom element, add its tag definition and attribute types to `packages/components/src/types/jsx.d.ts` so consuming React applications have full autocomplete and type safety.
 - **Testing Lit Components**:
-  - Test rendering, property reflection, slots, and events in Vitest (`pnpm test:components`).
+  - Test rendering, property reflection, slots, and events in Jest (`pnpm test:components`).
   - **Important**: Always `await element.updateComplete` after modifying properties in tests before making DOM assertions to allow Lit's asynchronous render cycle to finish.
 
 ---
@@ -338,8 +344,8 @@ For detailed architectural guidelines, coding conventions, testing standards, an
 
 - **Root Monorepo Guide**: [`AGENTS.md`](./AGENTS.md) — Workspace architecture, orchestration, contracts synchronization, and CI verification protocol.
 - **Backend API Guide**: [`server/AGENTS.md`](./apps/server/AGENTS.md) — NestJS 11 architecture, DTO design, Swagger metadata, scripts, and Jest testing.
-- **Frontend SPA Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, ApiClient usage, React Router, and Vitest testing.
-- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Vitest component testing.
+- **Frontend SPA Guide**: [`client/AGENTS.md`](./apps/client/AGENTS.md) — React 19 SPA architecture, ApiClient usage, React Router, and Jest testing.
+- **Components Design System Guide**: [`components/AGENTS.md`](./packages/components/AGENTS.md) — Lit Web Components architecture, design tokens, Storybook stories, and Jest component testing.
 
 ### Automatic Documentation Maintenance
 

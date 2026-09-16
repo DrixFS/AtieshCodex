@@ -1,6 +1,6 @@
 # Client Agent Guide: Atiesh Codex Frontend SPA
 
-This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working specifically on the **React Single-Page Application (SPA)** (`client/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com**.
+This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working specifically on the **React Single-Page Application (SPA)** (`apps/client/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever). Production deployment at **atieshcodex.com**.
 
 ---
 
@@ -22,6 +22,7 @@ apps/client/
 │   │   │   └── index.ts
 │   │   ├── config/         # Frontend environment configuration & typed accessors
 │   │   │   ├── env.ts
+│   │   │   ├── env.test.ts
 │   │   │   └── index.ts
 │   │   ├── layout/         # Shared layout shell components
 │   │   │   ├── MainLayout.tsx
@@ -30,12 +31,18 @@ apps/client/
 │   │   ├── query/          # TanStack React Query provider & client setup
 │   │   │   ├── query-client.ts
 │   │   │   ├── QueryProvider.tsx
+│   │   │   ├── QueryProvider.test.tsx
 │   │   │   └── index.ts
 │   │   ├── stores/         # MobX root and domain stores, StoreProvider & hooks
-│   │   │   ├── root.store.ts
-│   │   │   ├── ui.store.ts
 │   │   │   ├── app.store.ts
+│   │   │   ├── app.store.test.ts
+│   │   │   ├── root.store.interface.ts
+│   │   │   ├── root.store.ts
+│   │   │   ├── root.store.test.ts
+│   │   │   ├── ui.store.ts
+│   │   │   ├── ui.store.test.ts
 │   │   │   ├── StoreProvider.tsx
+│   │   │   ├── StoreProvider.test.tsx
 │   │   │   └── index.ts
 │   │   ├── router/         # React Router configuration and router bootstrap
 │   │   │   ├── routes.ts
@@ -49,7 +56,8 @@ apps/client/
 │   │   └── <feature>/      # Feature folder (components, hooks, api, types, tests)
 │   ├── test/               # Jest test setup and test polyfills
 │   │   ├── polyfills.cjs   # Web Stream, Undici, and Worker thread polyfills for Jest
-│   │   └── setup.ts        # @testing-library/jest-dom extensions
+│   │   ├── setup.ts        # @testing-library/jest-dom extensions
+│   │   └── styleMock.cjs   # Mock for CSS and style assets in Jest
 │   ├── App.tsx             # Main application component
 │   ├── App.test.tsx        # Top-level application test suite
 │   ├── App.css             # Component-level styles
@@ -97,9 +105,9 @@ apps/client/
 
 ### `@atiesh/components` (Workspace Design System Integration)
 
-- The client links directly to `@atiesh/components` (`workspace:*` in `client/package.json`).
+- The client links directly to `@atiesh/components` (`workspace:*` in `apps/client/package.json`).
 - Design tokens and theme CSS are imported directly (`import '@atiesh/components/theme.css'`).
-- Web Components custom element types are resolved from `@atiesh/components`, enabling live Hot Module Replacement (HMR) during frontend development when editing components in `components/src/`.
+- Web Components custom element types are resolved from `@atiesh/components`, enabling live Hot Module Replacement (HMR) during frontend development when editing components in `packages/components/src/`.
 
 ---
 
@@ -204,7 +212,7 @@ apps/client/
 - **Centralized Consumption**:
   - Always import `env` or `config` from `src/core/config` (`import { config, env } from '@/core/config'`) rather than accessing raw `import.meta.env` directly in components or services.
 - **Templates & Local Configuration**:
-  - Client template is defined in `client/.env.example` and mirrored in the root `.env.example`.
+  - Client template is defined in `apps/client/.env.example` and mirrored in the root `.env.example`.
   - When introducing a new client environment variable, define its validator in `clientEnvSchema` (`src/core/config/env.ts`) and update `.env.example` templates.
 - **Security & Source Control**:
   - Never commit `.env`, `.env.local`, or `.env.*` files containing secrets or developer credentials (ignored via monorepo `.gitignore`).
@@ -218,7 +226,7 @@ apps/client/
 
 ### 9. Design System & Web Components Integration
 
-- The monorepo provides a standalone Web Components design system package named `@atiesh/components` in `components/`.
+- The monorepo provides a standalone Web Components design system package named `@atiesh/components` in `packages/components/`.
 - **Direct Workspace Integration**: The client application links directly to `@atiesh/components` via pnpm workspace (`workspace:*`).
 - Theme CSS is loaded globally via `import '@atiesh/components/theme.css'` in `src/index.css`.
 - Reusable UI elements built as Custom Elements can be imported and rendered in React 19 JSX seamlessly with instant hot-reloading during development.
@@ -226,11 +234,11 @@ apps/client/
 
 ### 10. Containerization & Production Build Isolation
 
-- **Self-Contained Docker Build** (`client/Dockerfile`):
+- **Self-Contained Docker Build** (`apps/client/Dockerfile`):
   - Multi-stage build leveraging `node:22-alpine` builder and lightweight `nginx:alpine` runtime.
   - Automatically installs workspace manifests, generates API types, builds workspace packages, and compiles Vite static assets inside the container.
   - Eliminates host machine dependencies on gitignored vendor artifacts during clean checkouts and CI/CD releases.
-- **Nginx Runtime (`client/nginx.conf`)**:
+- **Nginx Runtime (`apps/client/nginx.conf`)**:
   - Configures SPA client-side routing fallback (`try_files $uri $uri/ /index.html`).
   - Enforces immutable long-term caching for hashed static assets (`/assets/`).
   - Sets defensive HTTP headers: HSTS (`Strict-Transport-Security`), `X-Frame-Options: SAMEORIGIN`, `X-Content-Type-Options: nosniff`, and Referrer Policy.
@@ -239,7 +247,7 @@ apps/client/
 
 - The client codebase enforces **TSDoc standards** (`/** ... */`) across all shared core infrastructure (`src/core/api/`, `src/core/stores/`, `src/core/query/`, `src/core/router/`, `src/core/config/`) and UI components.
 - **Automated TypeDoc Generation**:
-  - Configured via `client/typedoc.json`.
+  - Configured via `apps/client/typedoc.json`.
   - Generates searchable, static HTML API documentation at top-level `Docs/client/`.
   - Build command: `pnpm --filter client run docs` (or from root: `pnpm run build:docs`).
 - **TSDoc Guidelines**:

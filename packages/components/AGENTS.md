@@ -1,12 +1,12 @@
 # Components Agent Guide: Atiesh Codex Web Components
 
-This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working on the **Web Components Library & Storybook** (`components/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever).
+This document provides specialized guidelines, architectural patterns, and development conventions for AI agents and developers working on the **Web Components Library & Storybook** (`packages/components/`) for Atiesh Codex (Fan-made project for World of Warcraft Forever).
 
 ---
 
 ## 1. Application Overview & Architecture
 
-The components package is a framework-agnostic, standalone **Web Components design system and UI library** built with **Lit 3**, **TypeScript 5**, **Vite 6**, **Storybook 8**, and **Vitest**. It serves as the single foundation for design tokens, styles, and reusable custom elements that can be seamlessly consumed by the React SPA (`client/`) or any standard web runtime without tight coupling.
+The components package is a framework-agnostic, standalone **Web Components design system and UI library** built with **Lit 3**, **TypeScript 5**, **Vite 6**, **Storybook 8**, and **Jest**. It serves as the single foundation for design tokens, styles, and reusable custom elements that can be seamlessly consumed by the React SPA (`apps/client/`) or any standard web runtime without tight coupling.
 
 ```text
 packages/components/
@@ -14,11 +14,13 @@ packages/components/
 │   ├── main.ts               # Storybook Vite & addon configuration
 │   └── preview.ts            # Global decorators, controls, theme preview
 ├── src/
+│   ├── __snapshots__/        # Baseline visual regression snapshots
 │   ├── components/           # Reusable Web Component modules (e.g. src/components/<name>/)
 │   ├── styles/               # Design tokens, CSS variables, and theme definitions
 │   │   ├── theme.css         # Global CSS custom properties & color tokens
 │   │   ├── tokens.ts         # Strongly-typed JavaScript/TypeScript design tokens
 │   │   ├── tokens.test.ts    # Unit tests for token scales
+│   │   ├── tokens.visual.test.ts # Storybook visual snapshot test suite
 │   │   └── tokens.stories.ts # Storybook visual token showcase
 │   ├── test/                 # Jest test setup and test helpers
 │   │   └── setup.ts          # @testing-library/jest-dom matchers setup
@@ -42,7 +44,7 @@ packages/components/
 When adding new Web Components to the design system, isolate each component into its own dedicated folder under `src/components/<component-name>/`:
 
 - **Component Implementation (`<name>.ts`)**: Lit-based Custom Element definition with encapsulated Shadow DOM styles, reactive properties, accessibility attributes, and custom event dispatches.
-- **Unit Tests (`<name>.test.ts`)**: Vitest test suite validating rendering, property reflections, slot behavior, user interaction, and event dispatching.
+- **Unit Tests (`<name>.test.ts`)**: Jest test suite validating rendering, property reflections, slot behavior, user interaction, and event dispatching.
 - **Storybook Stories (`<name>.stories.ts`)**: Interactive documentation with controls, variations, and themes.
 - **Barrel Export (`index.ts`)**: Exports the component class and associated types.
 
@@ -133,13 +135,15 @@ Component commands can be run from the root workspace or directly within `packag
 | :-------------------------------------------- | :---------------------------------- | :----------------------------------------------------------- |
 | `pnpm run dev:storybook`                      | `pnpm dev`                          | Start Storybook development server on port 6006              |
 | `pnpm run build:components`                   | `pnpm build`                        | Compile TypeScript and bundle library distribution in `dist` |
-| `pnpm run build:storybook`                    | `pnpm build:storybook`              | Build static Storybook site in `Docs/storybook`              |
+| `pnpm run build:storybook`                    | `pnpm build:storybook`              | Build static Storybook site in `Docs/storybook/`             |
 | `pnpm run test:components`                    | `pnpm test`                         | Run all component unit tests with Jest                       |
 | `pnpm --filter @atiesh/components test:watch` | `pnpm test:watch`                   | Run Jest in interactive watch mode                           |
+| `pnpm --filter @atiesh/components test:cov`   | `pnpm test:cov`                     | Run Jest test coverage report                                |
 | `pnpm run test:visual`                        | `pnpm test:visual`                  | Run Storybook visual regression tests with Playwright        |
 | `pnpm run test:visual:update`                 | `pnpm test:visual:update`           | Update baseline visual snapshots for Storybook stories       |
 | `pnpm run check:circular:components`          | `pnpm check:circular`               | Check for circular dependencies in Web Components via `dpdm` |
 | `pnpm --filter @atiesh/components typecheck`  | `pnpm typecheck`                    | Run TypeScript compiler type checking (`tsc --noEmit`)       |
+| `pnpm --filter @atiesh/components typewatch`  | `pnpm typewatch`                    | Run TypeScript compiler type checking in watch mode          |
 | `pnpm --filter @atiesh/components clean`      | `pnpm clean`                        | Clean build output directories (`dist`, `dist-storybook`)    |
 
 ---

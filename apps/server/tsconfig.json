@@ -1,6 +1,7 @@
 {
   "extends": "../../packages/tsconfig/node.json",
   "compilerOptions": {
+    "outDir": "./dist",
     "strictPropertyInitialization": false,
     "strictBindCallApply": true,
     "types": ["node", "jest"]

@@ -7,8 +7,6 @@
     "target": "ES2022",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "outDir": "./dist",
-    "baseUrl": "./"
+    "allowSyntheticDefaultImports": true
   }
 }
