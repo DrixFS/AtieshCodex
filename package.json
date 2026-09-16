@@ -44,7 +44,7 @@
     "check:circular:components": "turbo run check:circular --filter=@atiesh/components",
     "validate": "pnpm run format:check && pnpm run lint && pnpm run check:circular && pnpm run typecheck && pnpm run test && pnpm run build && pnpm run build:docs",
     "audit": "pnpm audit --prod",
-    "prepare": "husky",
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production' && !process.env.CI) try { (require('husky').default || require('husky'))() } catch {}\"",
     "pre-commit": "lint-staged --relative",
     "pre-push": "pnpm run check:circular",
     "start": "pnpm --filter server run start",

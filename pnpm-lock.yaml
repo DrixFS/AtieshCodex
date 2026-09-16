@@ -332,6 +332,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.5
     devDependencies:
+      '@atiesh/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@swc/core':
         specifier: 'catalog:'
         version: 1.16.2
@@ -423,6 +426,9 @@ importers:
         specifier: ^7.8.1
         version: 7.8.2
     devDependencies:
+      '@atiesh/tsconfig':
+        specifier: workspace:*
+        version: link:../../packages/tsconfig
       '@nestjs/cli':
         specifier: ^11.0.0
         version: 11.0.24(@swc/core@1.16.2)(@types/node@22.20.2)(esbuild@0.25.12)(postcss@8.5.28)(prettier@3.9.6)(uglify-js@3.19.3)
@@ -480,6 +486,9 @@ importers:
 
   packages/components:
     devDependencies:
+      '@atiesh/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.63.0
@@ -531,6 +540,9 @@ importers:
 
   packages/contracts:
     devDependencies:
+      '@atiesh/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
       typescript:
         specifier: 'catalog:'
         version: 5.9.3

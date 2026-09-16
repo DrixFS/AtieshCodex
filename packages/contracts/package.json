@@ -24,6 +24,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
+    "@atiesh/tsconfig": "workspace:*",
     "typescript": "catalog:"
   }
 }
